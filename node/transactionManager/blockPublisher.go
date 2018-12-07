@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	blockInterval = 1000
+	blockInterval = 10 * time.Second
 )
 
 type BlockPublisher struct {
@@ -22,7 +22,8 @@ func NewBlockPublisher(m *TransactionManager) *BlockPublisher {
 	}
 
 	go func() {
-		for range time.Tick(blockInterval) {
+		for {
+			time.Sleep(blockInterval)
 			result.AssembleBlock()
 		}
 	}()

@@ -7,6 +7,7 @@ import (
 	"../plasmautils/primeset"
 	"../plasmautils/slice"
 	"../utils"
+	"encoding/hex"
 
 	"fmt"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -66,7 +67,12 @@ func NewBlock(blockNumber uint32, previousHash Uint256, previousRSAAccumulator U
 		return nil, err
 	}
 
-	err = block.Sign(config.GetOperator().MainAccountPrivateKey)
+	key, err := hex.DecodeString(config.GetOperator().MainAccountPrivateKey[2:])
+	if err != nil {
+		return nil, err
+	}
+
+	err = block.Sign(key)
 	if err != nil {
 		return nil, err
 	}
