@@ -283,7 +283,7 @@
         if (i == undefined) {
             i = 0;
         }
-        let data = JSON.stringify({date: new Date(), val: value, event_type: "Deposit"});
+        let data = JSON.stringify({date: new Date(), val: value, event_type: "Deposit", txHash: result.txHash});
         localStorage.setItem(i, data);
         i++;
         localStorage.setItem("itemsLength", i);
@@ -380,7 +380,7 @@
         update();
         make_table();
 
-    }, 1000);
+    }, 5000);
 
 
     async function block_number_get() {

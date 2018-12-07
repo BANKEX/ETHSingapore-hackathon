@@ -1,7 +1,6 @@
 package server
 
 import (
-
 	"./handlers"
 	"github.com/gin-gonic/contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -9,10 +8,11 @@ import (
 
 func GinServer() {
 
-	r := gin.New()
-	r.Use(gin.Recovery())
+	r := gin.Default()
+	//r := gin.New()
+	//r.Use(gin.Recovery())
 	r.Use(cors.Default())
-	gin.SetMode(gin.ReleaseMode)
+	//gin.SetMode(gin.ReleaseMode)
 
 	r.GET("/etherBalance", handlers.EthereumBalance)
 	r.GET("/plasmaBalance", handlers.PlasmaBalance)

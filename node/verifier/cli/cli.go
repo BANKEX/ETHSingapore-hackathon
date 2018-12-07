@@ -1,11 +1,9 @@
 package cli
 
 import (
-	"../../../../plasma-research-new/software/commons/config"
-	"../../../../plasma-research-new/software/commons/db"
-	"../../../../plasma-research-new/software/commons/listeners/storage"
 	"fmt"
 	"github.com/c-bata/go-prompt"
+	"../../config"
 )
 
 func commandsInfo(d prompt.Document) []prompt.Suggest {
@@ -21,17 +19,13 @@ func commandsInfo(d prompt.Document) []prompt.Suggest {
 func commandsListener(input string) {
 	switch input {
 	case "smartContractAddress":
-		fmt.Println(config.SmartContractAddress)
+		fmt.Println(config.GetVerifier().PlasmaContractAddress)
 	case "plasmaBalance":
 		fmt.Println("Not working yet")
 	case "smartContractBalance":
-		fmt.Println("Smart Contract Balance:" + storage.Balance)
+		fmt.Println("Smart Contract Balance:" + "0")
 	case "events":
-		events, err := db.Event("database").GetAll()
-		if err != nil {
-			println("Mistake at cli.go 34 line with DB")
-		}
-		fmt.Println(events)
+		fmt.Println ("0")
 	}
 	return
 }

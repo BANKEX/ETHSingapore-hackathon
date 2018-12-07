@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
+	"../../../ethereum"
 	"net/http"
 )
 
@@ -25,8 +26,9 @@ func PlasmaContractAddress(c *gin.Context) {
 
 
 func DepositHandler(c *gin.Context) {
+	result := ethereum.Deposit(c.Param("sum"))
 	c.JSON(http.StatusOK, gin.H{
-		"test": "test",
+		"txHash": result,
 	})
 }
 
