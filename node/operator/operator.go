@@ -6,6 +6,7 @@ import (
 	"./handlers"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"log"
 )
 
 func main() {
@@ -25,7 +26,7 @@ func main() {
 
 	err := r.Run(fmt.Sprintf(":%d", config.GetOperator().OperatorPort))
 	if err != nil {
-		println(err)
+		log.Fatal(err)
 	}
 
 	println("Operator started")
