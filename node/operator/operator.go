@@ -21,7 +21,7 @@ func main() {
 	r.POST("/tx", handlers.PostTransaction)
 	//r.GET("/config") // returns contract address and abi
 	//r.GET("/status") // returns last plasma block number etc.
-	//r.GET("/utxo/:address") // returns a list of utxos for an address
+	r.GET("/utxo/:address", handlers.GetUtxos) // returns a list of utxos for an address
 
 	err := r.Run(fmt.Sprintf(":%d", config.GetOperator().OperatorPort))
 	if err != nil {

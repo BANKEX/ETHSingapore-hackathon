@@ -5,6 +5,7 @@ import (
 	"../blockchain"
 	"../utils"
 	"bytes"
+	"encoding/hex"
 	"fmt"
 	"sync"
 )
@@ -106,6 +107,20 @@ func (p *TransactionManager) AssembleBlock() (*blockchain.Block, error) {
 	p.lastAccumulator = block.RSAAccumulator
 	p.transactionQueue = make([]*blockchain.Transaction, 0)
 	return block, nil
+}
+
+func (p *TransactionManager) GetUtxosForAddress(address string) ([]*blockchain.Input, error) {
+	addr, err := hex.DecodeString(address[2:])
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*blockchain.Input, 0)
+	for _, out := range p.utxoIndex {
+		if bytes.Compare(out.Owner, addr) == 0 {
+			result = append(result, out)
+		}
+	}
+	return result, nil
 }
 
 // todo add utxo on deposit event, avoid double deposits
