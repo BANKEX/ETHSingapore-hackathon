@@ -23,8 +23,11 @@ type UnsignedTransaction struct {
 	Metadata Metadata `json:"metadata"`
 }
 
+// Signatures may only contain one or two signatures
 type Transaction struct {
 	UnsignedTransaction
+	// Signatures 65 bytes long ECDSA signature encoded in RSV format
+	// R(32) bytes S(32) bytes  V(1) byte
 	Signatures []Signature `json:"signatures"`
 }
 
@@ -34,14 +37,22 @@ type Metadata struct {
 	MaxBlockNumber uint32 `json:"maxBlockNumber"`
 }
 
+// Input represents transaction input in terms of UTXO model
+// Input should refers to output of some previous transaction
+// BlockIndex, TxIndex and OutputIndex helps to find out where that input are
 type Input struct {
-	BlockIndex  uint32 `json:"blockNumber"`
-	TxIndex     uint32 `json:"txNumber"`
-	OutputIndex uint8  `json:"outputNumber"`
+	// index of the block that contains corresponding output
+	BlockIndex uint32 `json:"blockNumber"`
+	// index of the transaction within the block
+	TxIndex uint32 `json:"txNumber"`
+	// index of the output within transaction
+	OutputIndex uint8 `json:"outputNumber"`
 	Output
 }
 
+// Output represents transaction output in terms of UTXO model
 type Output struct {
+	// Ethereum address of the owner
 	Owner Uint160     `json:"owner"`
 	Slice slice.Slice `json:"slice"`
 }
