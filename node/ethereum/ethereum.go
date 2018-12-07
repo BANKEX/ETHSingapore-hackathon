@@ -63,3 +63,17 @@ func Deposit(sum string) string {
 	return tx.Hash().String()
 
 }
+
+func GetBalance(address string) string {
+	client, err := ethclient.Dial(config.GetVerifier().GethHost)
+	if err != nil {
+		log.Println(err)
+	}
+
+	account := common.HexToAddress(address)
+	pendingBalance, err := client.PendingBalanceAt(context.Background(), account)
+	if err != nil {
+		log.Println(err)
+	}
+	return pendingBalance.String()
+}

@@ -172,6 +172,7 @@
                                     </div>
                                     <h3 class="info-title">Plasma works fine</h3>
                                     <h4>Latest block: <span id="latest_block"></span></h4>
+                                    <h4>Contract address: <span id="contract_address"></span></h4>
                                 </div>
 
                             </div>
@@ -211,7 +212,8 @@
                                          src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Hilbert_curve_2.svg/512px-Hilbert_curve_2.svg.png"
                                          alt=""/>
                                     <br>
-                                    <h3>Total balance: <span id="balance"></span> ETH</h3>
+                                    <h3>Total balance: <span id="balance"></span> WEI</h3>
+                                    <h3>My balance: <span id="my_balance"></span> WEI</h3>
                                 </div>
                             </div>
                         </div>
@@ -371,10 +373,15 @@
         let verifiers_amount = await verifiers_amount_get();
         let users = await users_get();
         let balance = await balance_get();
+        let my_balance = await my_balance_get();
+        let contract_address = await contract_address_get();
+
         document.getElementById("latest_block").innerText = block_number;
         document.getElementById("verifiers_amount").innerText = verifiers_amount;
         document.getElementById("users").innerText = users;
         document.getElementById("balance").innerText = balance;
+        document.getElementById("my_balance").innerText = my_balance;
+        document.getElementById("contract_address").innerText = contract_address;
 
         clear();
         update();
@@ -383,6 +390,14 @@
     }, 5000);
 
 
+    async function contract_address_get() {
+        const result = await getRequest("", "", "contractAddress");
+        return (result.address);
+    }
+    async function my_balance_get() {
+        const result = await getRequest("", "", "etherBalance");
+        return (result.balance);
+    }
     async function block_number_get() {
         const result = await getRequest("", "", "latestBlock");
         // console.log(result.latest_block_number);

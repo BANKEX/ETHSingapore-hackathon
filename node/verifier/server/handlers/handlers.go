@@ -3,24 +3,26 @@ package handlers
 import (
 	"github.com/gin-gonic/gin"
 	"../../../ethereum"
+	"../../../config"
 	"net/http"
 )
 
 func EthereumBalance(c *gin.Context) {
+	response:= ethereum.GetBalance(config.GetVerifier().VerifierPublicKey)
 	c.JSON(http.StatusOK, gin.H{
-		"Balance": "-",
+		"balance": response,
 	})
 }
 
 func PlasmaBalance(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
-		"Balance": "0",
+		"balance": "0",
 	})
 }
 
 func PlasmaContractAddress(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
-		"Address": "0",
+		"address": config.GetVerifier().PlasmaContractAddress,
 	})
 }
 
