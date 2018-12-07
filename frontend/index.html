@@ -171,7 +171,6 @@
 
                                     </div>
                                     <h3 class="info-title">Plasma works fine</h3>
-                                    <h4>Latest block: <span id="latest_block"></span></h4>
                                     <h4>Contract address: <span id="contract_address"></span></h4>
                                 </div>
 
@@ -189,10 +188,10 @@
                             <div class="col-md-6 text-center">
                                 <div class="info">
                                     <div class="icon icon-success">
-                                        <i class="material-icons">people</i>
+                                        <i class="material-icons">block</i>
                                     </div>
-                                    <h3 class="info-title">Users</h3>
-                                    <h3><span id="users"></span></h3>
+                                    <h3 class="info-title">Latest block</h3>
+                                    <h3> <span id="latest_block"></span></h3>
                                 </div>
                             </div>
                         </div>
@@ -371,14 +370,12 @@
     window.setInterval(async function () {
         let block_number = await block_number_get();
         let verifiers_amount = await verifiers_amount_get();
-        let users = await users_get();
         let balance = await balance_get();
         let my_balance = await my_balance_get();
         let contract_address = await contract_address_get();
 
         document.getElementById("latest_block").innerText = block_number;
         document.getElementById("verifiers_amount").innerText = verifiers_amount;
-        document.getElementById("users").innerText = users;
         document.getElementById("balance").innerText = balance;
         document.getElementById("my_balance").innerText = my_balance;
         document.getElementById("contract_address").innerText = contract_address;
@@ -387,7 +384,7 @@
         update();
         make_table();
 
-    }, 5000);
+    }, 500);
 
 
     async function contract_address_get() {
@@ -408,12 +405,6 @@
         const result = await getRequest("", "", "verifiersAmount");
         // console.log(result.verifiers_amount);
         return (result.verifiers_amount);
-    }
-
-    async function users_get() {
-        const result = await getRequest("", "", "usersCount");
-        // console.log(result.users);
-        return (result.users);
     }
 
     async function balance_get() {
