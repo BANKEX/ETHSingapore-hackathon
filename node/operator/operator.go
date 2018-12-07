@@ -1,8 +1,10 @@
 package main
 
 import (
+	"../config"
 	"../transactionManager"
 	"./handlers"
+	"fmt"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,6 +22,11 @@ func main() {
 	//r.GET("/config") // returns contract address and abi
 	//r.GET("/status") // returns last plasma block number etc.
 	//r.GET("/utxo/:address") // returns a list of utxos for an address
+
+	err := r.Run(fmt.Sprintf(":%d", config.GetOperator().OperatorPort))
+	if err != nil {
+		println(err)
+	}
 
 	println("Operator started")
 }

@@ -49,11 +49,11 @@ func getConfig(instance interface{}) interface{} {
 }
 
 // GetOperator gets operator config instance.
-func GetOperator() OperatorConfig {
-	return getConfig(operatorConfigInstance).(OperatorConfig)
+func GetOperator() *OperatorConfig {
+	return getConfig(operatorConfigInstance).(*OperatorConfig)
 }
 
 // GetVerifier gets verifier config instance.
-func GetVerifier() VerifierConfig {
-	return getConfig(verifierConfigInstance).(VerifierConfig)
+func GetVerifier() *VerifierConfig {
+	return getConfig(verifierConfigInstance).(*VerifierConfig)
 }
