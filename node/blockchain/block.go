@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	. "../alias"
+	"../config"
 	"../plasmautils/plasmacrypto"
 	"../plasmautils/primeset"
 	"../plasmautils/slice"
@@ -11,12 +12,6 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"math/big"
 )
-
-const PlasmaRangeSpace = 2 ^ 24 - 1
-
-// For test only
-var Balance = map[string]int{"balance": 0}
-var PrivateKey []byte // todo move and init in config
 
 // UnsignedBlockHeader is a structure that signature is calculated for.
 type UnsignedBlockHeader struct {
@@ -71,7 +66,7 @@ func NewBlock(blockNumber uint32, previousHash Uint256, previousRSAAccumulator U
 		return nil, err
 	}
 
-	err = block.Sign(PrivateKey)
+	err = block.Sign(config.GetOperator().MainAccountPrivateKey)
 	if err != nil {
 		return nil, err
 	}
@@ -113,9 +108,10 @@ func (b *Block) Sign(key []byte) error {
 
 // CalculateMerkleRoot calculates merkle root for transactions in the block.
 func (b *Block) CalculateMerkleRoot() error {
-	leaves := PrepareLeaves(b.Transactions)
-	tree := NewSumMerkleTree(leaves)
-	b.MerkleRoot = tree.GetRoot()
+	// todo
+	//leaves := PrepareLeaves(b.Transactions)
+	//tree := NewSumMerkleTree(leaves)
+	//b.MerkleRoot = tree.GetRoot()
 	return nil
 }
 
