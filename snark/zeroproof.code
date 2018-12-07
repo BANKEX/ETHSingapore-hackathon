@@ -1,0 +1,46 @@
+//template for algebraic hash
+// plasma is 32bit. so, all magnitudes limeted by 2^32-1
+// NOT IMPLEMENTED: safe algebraic hash. Overflows are safe due summerkletree architecture in plasma.
+
+def alghash(field x, field y) -> (field):
+  return x+y+1
+
+def compress4(field x1, field x2, field x3, field x4) -> (field):
+  return alghash(alghash(alghash(x1, x2), x3), x4)
+
+
+def s32(field offset, field[512] input) -> (field[32]):
+	field[32] result = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+	for field i in 0..32 do
+		result[i] = input[offset + i]
+	endfor
+return result
+
+
+def smp(field sliceBegin, field sliceEnd, field[32] proofHash, field[32] proofLength, field[32] proofBit) -> (field):
+  field curHash = 0
+  field curLeft = sliceBegin
+  field curLength = sliceEnd - sliceBegin
+  for field i in 0..32 do
+    curHash = compress4(proofLength[i], curLength, proofHash[i], curHash)*proofBit[i]+compress4(curLength, proofLength[i], curHash, proofHash[i])*(1-proofBit[i])
+    curLeft = curLeft - proofLength[i]*proofBit[i]
+    curLength = curLength + proofLength[i]
+  endfor
+  curLeft == 0
+  //for 32bit plasma state
+  curLength == 4294967295
+  return curHash
+
+
+def main(field totalHash, field proofSliceBegin, field proofSliceEnd, private field[16] rootHash, private field[16] sliceBegin, private field[16] sliceEnd, private field[512] proofHash, private field[512] proofLength, private field[512] proofBit) -> (field):
+  for field i in 0..512 do
+    proofBit[i] == proofBit[i] * proofBit[i]
+  endfor
+
+  field curHash = 0
+  for field i in 0..16 do
+    curHash = alghash(curHash, rootHash[i])
+    rootHash[i]==smp(sliceBegin[i], sliceEnd[i], s32(i*32, proofHash), s32(i*32, proofLength), s32(i*32, proofBit))
+  endfor
+  curHash == totalHash 
+  return 1
