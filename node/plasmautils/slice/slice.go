@@ -7,8 +7,8 @@ import (
 )
 
 type Slice struct {
-	Begin uint32
-	End   uint32
+	Begin uint32 `json:"begin"`
+	End   uint32 `json:"end"`
 }
 
 const TreeHeight = 24

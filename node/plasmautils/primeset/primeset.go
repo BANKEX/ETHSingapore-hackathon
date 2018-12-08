@@ -117,14 +117,14 @@ func ProofN(i int) []*crypto.Cipher {
 	return res
 }
 
-func init() {
-	if _, err := os.Stat("assets/primedataset"); os.IsNotExist(err) {
-		initFiles()
-		return
-	}
-	if _, err := os.Stat("assets/primediffs"); os.IsNotExist(err) {
-		initFiles()
-		return
-	}
-	loadFiles()
-}
+// func init() {
+// 	if _, err := os.Stat("assets/primedataset"); os.IsNotExist(err) {
+// 		initFiles()
+// 		return
+// 	}
+// 	if _, err := os.Stat("assets/primediffs"); os.IsNotExist(err) {
+// 		initFiles()
+// 		return
+// 	}
+// 	loadFiles()
+// }
