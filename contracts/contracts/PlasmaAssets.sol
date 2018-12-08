@@ -176,17 +176,32 @@ contract PlasmaAssets is Ownable {
     return true;
   }
 
-  // function withdrawalChallangeSpend(
-  //   PlasmaDecoder.Input memory input,
-  //   SumMerkleProof.Proof memory txProof,
-  //   uint64 blockIndex,
-  //   uint8 spendIndex
-  // )
-  //   public
-  //   returns(bool)
-  // {
-  //   return true;
-  // }
+  function withdrawalChallangeSpend(
+    bytes memory inputBytes, // PlasmaDecoder.Input
+    bytes memory txProofBytes, // SumMerkleProof.Proof
+    uint64 blockIndex,
+    uint8 spendIndex
+  )
+    public
+    returns(bool)
+  {
+    PlasmaDecoder.Input memory input = inputBytes.decodeInput();
+    SumMerkleProof.Proof memory txProof = txProofBytes.decodeProof();
+
+    bytes32 inputHash = keccak256(abi.encodePacked(input.owner,
+      input.blockIndex,
+      input.txIndex,
+      input.outputIndex,
+      input.assetId,
+      input.begin,
+      input.end
+    ));
+    require(_allWithdrawalHashes[inputHash], "You should start withdrawal first");
+
+    //TODO: check inclusion
+
+    return true;
+  }
 
   // function withdrawalChallangeExistance(
   //   ExitState state,
