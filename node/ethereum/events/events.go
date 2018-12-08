@@ -2,7 +2,7 @@ package events
 
 import (
 	"../../config"
-	"../../ethereum/plasmacontract"
+	"../plasmacontract"
 	"context"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
