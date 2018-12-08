@@ -26,7 +26,7 @@ contract PlasmaAssets is Ownable {
   event AssetDeposited(
     address indexed token,
     address indexed who,
-    uint256 intervalId,
+    uint64 intervalId,
     uint64 begin,
     uint64 end
   );
