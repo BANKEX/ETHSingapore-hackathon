@@ -33,25 +33,11 @@ contract('PlasmaBlocks', function ([_, wallet1, wallet2, wallet3, wallet4, walle
     //                      ^--[ ]
     //                      ^--[7] [8] [9]
     //
-    await plasma.submitBlocks(0, '0x' + to160bits([1, 2, 3]), 0, 0);
-    await plasma.submitBlocks(3, '0x' + to160bits([4]), 2, 3);
-    await plasma.submitBlocks(4, '0x' + to160bits([5, 6]), 3, 4);
-    await plasma.submitBlocks(6, '0x' + to160bits([]), 5, 6);
-    await plasma.submitBlocks(6, '0x' + to160bits([7, 8, 9]), 5, 6);
-  });
-
-  it('should revert on wrong protected block index', async function () {
-    //
-    // [1] [2] [3] [ ] [ ] [ ]
-    //              ^
-    //             [4]
-    //             [4]--^
-    //             [4]------^
-    //
-    await plasma.submitBlocks(0, '0x' + to160bits([1, 2, 3]), 0, 0);
-    await plasma.submitBlocks(3, '0x' + to160bits([4]), 3, 3).should.be.rejectedWith(EVMRevert);
-    await plasma.submitBlocks(3, '0x' + to160bits([4]), 4, 3).should.be.rejectedWith(EVMRevert);
-    await plasma.submitBlocks(3, '0x' + to160bits([4]), 5, 3).should.be.rejectedWith(EVMRevert);
+    await plasma.submitBlocks(0, '0x' + to160bits([1, 2, 3]));
+    await plasma.submitBlocks(3, '0x' + to160bits([4]));
+    await plasma.submitBlocks(4, '0x' + to160bits([5, 6]));
+    await plasma.submitBlocks(6, '0x' + to160bits([]));
+    await plasma.submitBlocks(6, '0x' + to160bits([7, 8, 9]));
   });
 
   it('should handle not latest protected block', async function () {
@@ -59,19 +45,8 @@ contract('PlasmaBlocks', function ([_, wallet1, wallet2, wallet3, wallet4, walle
     // [1] [2] [3]
     //      ^------[4]
     //
-    await plasma.submitBlocks(0, '0x' + to160bits([1, 2, 3]), 0, 0);
-    await plasma.submitBlocks(3, '0x' + to160bits([4]), 1, 2);
-  });
-
-  it('should revert on wrong protected block hash', async function () {
-    //
-    // [1] [2] [3]
-    //          ^--[4]
-    //          ^--[4]
-    //
-    await plasma.submitBlocks(0, '0x' + to160bits([1, 2, 3]), 0, 0);
-    await plasma.submitBlocks(3, '0x' + to160bits([4]), 2, 2).should.be.rejectedWith(EVMRevert);
-    await plasma.submitBlocks(3, '0x' + to160bits([4]), 2, 4).should.be.rejectedWith(EVMRevert);
+    await plasma.submitBlocks(0, '0x' + to160bits([1, 2, 3]));
+    await plasma.submitBlocks(3, '0x' + to160bits([4]));
   });
 
   it('should revert on submit blocks with intersections', async function () {
@@ -85,14 +60,14 @@ contract('PlasmaBlocks', function ([_, wallet1, wallet2, wallet3, wallet4, walle
     //              ^----------[7] [8]
     //  ^------------------------------[9]
     //
-    await plasma.submitBlocks(0, '0x' + to160bits([1, 2, 3]), 0, 0);
-    await plasma.submitBlocks(2, '0x' + to160bits([3, 4]), 2, 3).should.be.rejectedWith(EVMRevert);
-    await plasma.submitBlocks(3, '0x' + to160bits([4, 5, 6]), 2, 3);
-    await plasma.submitBlocks(6, '0x' + to160bits([]), 5, 6);
-    await plasma.submitBlocks(3, '0x' + to160bits([4, 5, 6]), 2, 3).should.be.rejectedWith(EVMRevert);
-    await plasma.submitBlocks(3, '0x' + to160bits([4, 5, 6]), 1, 2).should.be.rejectedWith(EVMRevert);
-    await plasma.submitBlocks(6, '0x' + to160bits([7, 8]), 3, 4);
-    await plasma.submitBlocks(8, '0x' + to160bits([9]), 0, 1);
+    await plasma.submitBlocks(0, '0x' + to160bits([1, 2, 3]));
+    await plasma.submitBlocks(2, '0x' + to160bits([3, 4])).should.be.rejectedWith(EVMRevert);
+    await plasma.submitBlocks(3, '0x' + to160bits([4, 5, 6]));
+    await plasma.submitBlocks(6, '0x' + to160bits([]));
+    await plasma.submitBlocks(3, '0x' + to160bits([4, 5, 6])).should.be.rejectedWith(EVMRevert);
+    await plasma.submitBlocks(3, '0x' + to160bits([4, 5, 6])).should.be.rejectedWith(EVMRevert);
+    await plasma.submitBlocks(6, '0x' + to160bits([7, 8]));
+    await plasma.submitBlocks(8, '0x' + to160bits([9]));
   });
 
   it('should revert old blocks', async function () {
@@ -101,9 +76,9 @@ contract('PlasmaBlocks', function ([_, wallet1, wallet2, wallet3, wallet4, walle
     //  ^--[2] [3]
     //  ^--[8] [9]
     //
-    await plasma.submitBlocks(0, '0x' + to160bits([1, 2, 3, 4]), 0, 0);
-    await plasma.submitBlocks(1, '0x' + to160bits([2, 3]), 0, 1).should.be.rejectedWith(EVMRevert);
-    await plasma.submitBlocks(1, '0x' + to160bits([8, 9]), 0, 1).should.be.rejectedWith(EVMRevert);
+    await plasma.submitBlocks(0, '0x' + to160bits([1, 2, 3, 4]));
+    await plasma.submitBlocks(1, '0x' + to160bits([2, 3])).should.be.rejectedWith(EVMRevert);
+    await plasma.submitBlocks(1, '0x' + to160bits([8, 9])).should.be.rejectedWith(EVMRevert);
   });
 
   it('should deny blocks after gap', async function () {
@@ -112,8 +87,8 @@ contract('PlasmaBlocks', function ([_, wallet1, wallet2, wallet3, wallet4, walle
     //             [ ]
     //          ^------[5] [6]
     //
-    await plasma.submitBlocks(0, '0x' + to160bits([1, 2, 3]), 0, 0);
-    await plasma.submitBlocks(4, '0x' + to160bits([5, 6]), 2, 3).should.be.rejectedWith(EVMRevert);
+    await plasma.submitBlocks(0, '0x' + to160bits([1, 2, 3]));
+    await plasma.submitBlocks(4, '0x' + to160bits([5, 6])).should.be.rejectedWith(EVMRevert);
   });
 
   describe('getters', async function () {
@@ -125,13 +100,13 @@ contract('PlasmaBlocks', function ([_, wallet1, wallet2, wallet3, wallet4, walle
 
       await plasma.blocks.call(0).should.be.rejectedWith(EVMThrow);
 
-      await plasma.submitBlocks(0, '0x' + to160bits([1, 2, 3]), 0, 0);
+      await plasma.submitBlocks(0, '0x' + to160bits([1, 2, 3]));
       (await plasma.blocks.call(0)).should.be.bignumber.equal(1);
       (await plasma.blocks.call(1)).should.be.bignumber.equal(2);
       (await plasma.blocks.call(2)).should.be.bignumber.equal(3);
       await plasma.blocks.call(3).should.be.rejectedWith(EVMThrow);
 
-      await plasma.submitBlocks(3, '0x' + to160bits([4, 5]), 2, 3);
+      await plasma.submitBlocks(3, '0x' + to160bits([4, 5]));
       (await plasma.blocks.call(0)).should.be.bignumber.equal(1);
       (await plasma.blocks.call(1)).should.be.bignumber.equal(2);
       (await plasma.blocks.call(2)).should.be.bignumber.equal(3);
@@ -148,10 +123,10 @@ contract('PlasmaBlocks', function ([_, wallet1, wallet2, wallet3, wallet4, walle
 
       (await plasma.blocksLength.call()).should.be.bignumber.equal(0);
 
-      await plasma.submitBlocks(0, '0x' + to160bits([1, 2, 3]), 0, 0);
+      await plasma.submitBlocks(0, '0x' + to160bits([1, 2, 3]));
       (await plasma.blocksLength.call()).should.be.bignumber.equal(3);
 
-      await plasma.submitBlocks(3, '0x' + to160bits([4, 5]), 2, 3);
+      await plasma.submitBlocks(3, '0x' + to160bits([4, 5]));
       (await plasma.blocksLength.call()).should.be.bignumber.equal(5);
     });
   });
@@ -239,29 +214,29 @@ contract('PlasmaBlocks', function ([_, wallet1, wallet2, wallet3, wallet4, walle
 
     {
       const messageHash = web3.sha3(
-        '0x' + to256bits([0]) + to160bits([1, 2, 3]) + to256bits([0]) + to160bits([0]),
+        '0x' + to256bits([0]) + to160bits([1, 2, 3]),
         { encoding: 'hex' }
       );
       const rsv = await web3.eth.sign(_, messageHash);
-      await plasma.submitBlocksSigned(0, '0x' + to160bits([1, 2, 3]), 0, 0, rsv, { from: wallet1 });
+      await plasma.submitBlocksSigned(0, '0x' + to160bits([1, 2, 3]), rsv, { from: wallet1 });
     }
 
     {
       const messageHash = web3.sha3(
-        '0x' + to256bits([3]) + to160bits([4]) + to256bits([2]) + to160bits([3]),
+        '0x' + to256bits([3]) + to160bits([4]),
         { encoding: 'hex' }
       );
       const rsv = await web3.eth.sign(_, messageHash);
-      await plasma.submitBlocksSigned(3, '0x' + to160bits([4]), 2, 3, rsv, { from: wallet2 });
+      await plasma.submitBlocksSigned(3, '0x' + to160bits([4]), rsv, { from: wallet2 });
     }
 
     {
       const messageHash = web3.sha3(
-        '0x' + to256bits([4]) + to160bits([5, 6, 7]) + to256bits([3]) + to160bits([4]),
+        '0x' + to256bits([4]) + to160bits([5, 6, 7]),
         { encoding: 'hex' }
       );
       const rsv = await web3.eth.sign(_, messageHash);
-      await plasma.submitBlocksSigned(4, '0x' + to160bits([5, 6, 7]), 3, 4, rsv, { from: wallet3 });
+      await plasma.submitBlocksSigned(4, '0x' + to160bits([5, 6, 7]), rsv, { from: wallet3 });
     }
   });
 });
