@@ -184,7 +184,7 @@ func Exit() {
 		log.Println(err)
 	}
 
-	tx, err := instance.WithdrawalBegin(auth, nil)
+	_, err = instance.WithdrawalBegin(auth, nil)
 	if err != nil {
 		log.Println(err)
 	}
