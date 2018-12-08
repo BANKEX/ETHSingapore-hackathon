@@ -1414,11 +1414,15 @@ contract PlasmaAssets is Ownable {
 
   // Withdrawals
 
-  function withdrawalBegin(PlasmaDecoder.Input memory input)
+  function withdrawalBegin(
+    bytes memory inputBytes // PlasmaDecoder.Input
+  )
     public
     payable //TODO: Bonds
     returns(bool)
   {
+    PlasmaDecoder.Input memory input = inputBytes.decodeInput();
+
     emit WithdrawalBegin(
       input.owner,
       input.blockIndex,
@@ -1467,11 +1471,13 @@ contract PlasmaAssets is Ownable {
   // }
     
   function withdrawalEnd(
-    PlasmaDecoder.Input memory input,
+    bytes memory inputBytes, // PlasmaDecoder.Input
     uint64 intervalId,
     IERC721 token,
     uint256 tokenId
   ) public {
+    PlasmaDecoder.Input memory input = inputBytes.decodeInput();
+
     bytes32 inputHash = keccak256(abi.encodePacked(input.owner,
       input.blockIndex,
       input.txIndex,
@@ -1505,11 +1511,6 @@ contract PlasmaAssets is Ownable {
 }
 
 // File: contracts/BankexPlasma.sol
-
-pragma experimental ABIEncoderV2;
-
-
-
 
 contract BankexPlasma is PlasmaBlocks, PlasmaAssets {
 

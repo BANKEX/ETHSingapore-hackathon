@@ -1,5 +1,4 @@
 pragma solidity ^0.4.24;
-pragma experimental ABIEncoderV2; // sed
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
@@ -13,6 +12,7 @@ import { PlasmaDecoder } from "./PlasmaDecoder.sol";
 contract PlasmaAssets is Ownable {
   using SafeMath for uint256;
   using SafeERC20 for IERC20;
+  using PlasmaDecoder for bytes;
   using OrderedIntervalList for OrderedIntervalList.Data;
 
   address constant public MAIN_COIN_ASSET_ID = address(0);
@@ -144,11 +144,15 @@ contract PlasmaAssets is Ownable {
 
   // Withdrawals
 
-  function withdrawalBegin(PlasmaDecoder.Input memory input)
+  function withdrawalBegin(
+    bytes memory inputBytes // PlasmaDecoder.Input
+  )
     public
     payable //TODO: Bonds
     returns(bool)
   {
+    PlasmaDecoder.Input memory input = inputBytes.decodeInput();
+
     emit WithdrawalBegin(
       input.owner,
       input.blockIndex,
@@ -197,11 +201,13 @@ contract PlasmaAssets is Ownable {
   // }
     
   function withdrawalEnd(
-    PlasmaDecoder.Input memory input,
+    bytes memory inputBytes, // PlasmaDecoder.Input
     uint64 intervalId,
     IERC721 token,
     uint256 tokenId
   ) public {
+    PlasmaDecoder.Input memory input = inputBytes.decodeInput();
+
     bytes32 inputHash = keccak256(abi.encodePacked(input.owner,
       input.blockIndex,
       input.txIndex,
