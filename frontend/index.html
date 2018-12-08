@@ -176,7 +176,6 @@
                                 <div class="info">
                                     <div class="icon icon-success">
                                         <i class="material-icons">desktop_windows</i>
-                                        <i class="material-icons">desktop_windows</i>
                                     </div>
                                     <h3 class="info-title">Amount of verifiers</h3>
                                     <h3><span id="verifiers_amount"></span></h3>
@@ -185,7 +184,7 @@
                             <div class="col-md-6 text-center">
                                 <div class="info">
                                     <div class="icon icon-success">
-                                        <i class="material-icons">block</i>
+                                        <i class="material-icons">view_module</i>
                                     </div>
                                     <h3 class="info-title">Latest block</h3>
                                     <h3><span id="latest_block"></span></h3>
@@ -204,20 +203,20 @@
                         <div class="row">
                             <div class="col-sm-12 text-center">
                                 <div class="info">
-                                    <img style="max-width: 200px"
-                                         src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Hilbert_curve_2.svg/512px-Hilbert_curve_2.svg.png"
-                                         alt=""/>
+                                    <!--<img style="max-width: 200px"-->
+                                    <!--src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Hilbert_curve_2.svg/512px-Hilbert_curve_2.svg.png"-->
+                                    <!--alt=""/>-->
                                     <br>
-                                    <h4><strong class="header">Total balance:</strong> <span id="balance"></span> WEI
-                                    </h4>
-                                    <h4><strong class="header">My balance:</strong> <span id="my_balance"></span> WEI
-                                    </h4>
+                                    <h3><strong class="header">Total balance:</strong></h3>
+                                    <h4><span id="balance"></span> WEI</h4>
+                                    <h3><strong class="header">My balance:</strong></h3>
+                                    <h4><span id="my_balance"></span> WEI</h4>
                                 </div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-12">
-                                <h2 align="center">My operations history</h2>
+                                <h3 align="center" class="info-title">My operations history</h3>
                                 <div class="table-responsive">
                                     <table id="history_table" class="table">
                                         <thead>
@@ -292,7 +291,7 @@
         address = getInputValue("transfer_address");
         await getRequest(value, address, "transfer");
         let i = localStorage.getItem(ITEMS_LEN) || 0;
-        let data = JSON.stringify({date: Date.prototype.getDate(), val: value, who: address, event_type: "Transfer"});
+        let data = JSON.stringify({date: new Date(), val: value, who: address, event_type: "Transfer"});
         localStorage.setItem(i, data);
         i++;
         localStorage.setItem(ITEMS_LEN, i);
@@ -323,13 +322,13 @@
     var amount = [];
 
     function get_data_for_table() {
+        amount = [];
+        data = [];
+        event_type = [];
         for (let i = 0; i < localStorage.getItem(ITEMS_LEN); i++) {
             data.push(JSON.parse(localStorage.getItem(i)).date);
             event_type.push(JSON.parse(localStorage.getItem(i)).event_type);
             amount.push(JSON.parse(localStorage.getItem(i)).val);
-            console.log(data)
-            console.log(event_type)
-            console.log(amount)
         }
     }
 
