@@ -78,7 +78,7 @@ func GetBalance(address string) string {
 	return pendingBalance.String()
 }
 
-func PushHashBlock(hash []byte) {
+func PushHashBlock(blockNumber uint32, hash []byte) {
 	client, err := ethclient.Dial(config.GetVerifier().GethHost)
 	if err != nil {
 		log.Println(err)
@@ -118,6 +118,7 @@ func PushHashBlock(hash []byte) {
 		log.Println(err)
 	}
 
+	// _, err = instance.SubmitBlocks(blockNumber, hash) // TODO: uncomment after regenerating abi
 	_, err = instance.SubmitBlocks(auth, nil, nil, nil, fromAddress) // TODO: normal params
 	if err != nil {
 		log.Println(err)
