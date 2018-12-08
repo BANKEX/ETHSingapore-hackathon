@@ -27,7 +27,7 @@
   "scripts": {
     "test": "scripts/test.sh",
     "coverage": "scripts/coverage.sh",
-    "dist": "truffle-flattener ./contracts/BankexPlasma.sol > BankexPlasma.full.sol && sed -i.bak 's/pragma experimental ABIEncoderV2; \\/\\/ sed//' BankexPlasma.full.sol && solcjs --bin --abi --optimize BankexPlasma.full.sol && mv BankexPlasma_full_sol_BankexPlasma.bin BankexPlasma.full.bin && mv BankexPlasma_full_sol_BankexPlasma.abi BankexPlasma.full.abi && rm BankexPlasma.full.sol.bak && rm BankexPlasma_full_*",
+    "dist": "truffle-flattener ./contracts/BankexPlasma.sol > BankexPlasma.full.sol && solcjs --bin --abi --optimize BankexPlasma.full.sol && mv BankexPlasma_full_sol_BankexPlasma.bin BankexPlasma.full.bin && mv BankexPlasma_full_sol_BankexPlasma.abi BankexPlasma.full.abi && rm BankexPlasma_full_*",
     "lint:js": "eslint .",
     "lint:js:fix": "eslint . --fix",
     "lint:sol": "solium -d .",
