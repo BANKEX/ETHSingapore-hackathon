@@ -5,6 +5,7 @@ import (
 	"../transactionManager"
 	"./handlers"
 	"fmt"
+	"github.com/gin-gonic/contrib/cors"
 	"github.com/gin-gonic/gin"
 	"log"
 )
@@ -17,6 +18,7 @@ func main() {
 
 	r := gin.New()
 	r.Use(gin.Recovery())
+	r.Use(cors.Default())
 	gin.SetMode(gin.ReleaseMode)
 	handlers.Manager = manager // todo refactor this
 
