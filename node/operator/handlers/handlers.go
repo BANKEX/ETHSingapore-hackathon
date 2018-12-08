@@ -19,12 +19,12 @@ func PostTransaction(c *gin.Context) {
 	var t blockchain.Transaction
 	err := c.BindJSON(&t)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	err = Manager.SubmitTransaction(&t)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -36,7 +36,7 @@ func GetUtxos(c *gin.Context) {
 	addr := c.Param("address")
 	utxos, err := Manager.GetUtxosForAddress(addr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, utxos)
@@ -66,7 +66,7 @@ func FundAddress(c *gin.Context) {
 	}
 	_, err := Manager.AssembleDepositBlock(out)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	c.String(http.StatusOK, "OK")
@@ -96,13 +96,13 @@ func Transact(c *gin.Context) {
 	}
 	err := tx.Sign(key)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	err = Manager.SubmitTransaction(&tx)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	c.String(http.StatusOK, "OK")

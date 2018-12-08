@@ -2,7 +2,6 @@ package transactionManager
 
 import (
 	"../blockchain"
-	"../ethereum"
 	"log"
 	"time"
 )
@@ -51,5 +50,5 @@ func (p *BlockPublisher) AssembleBlock() {
 	//}
 
 	// todo
-	ethereum.PushHashBlock(block.BlockNumber, block.GetHash())
+	//ethereum.PushHashBlock(block.BlockNumber, block.GetHash())
 }

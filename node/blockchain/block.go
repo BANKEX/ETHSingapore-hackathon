@@ -58,7 +58,8 @@ func NewBlock(blockNumber uint32, previousHash Uint256, previousRSAAccumulator U
 		Transactions: transactions,
 	}
 
-	block.UpdateRSAAccumulator(previousRSAAccumulator)
+	// todo enable RSA accumulator
+	//block.UpdateRSAAccumulator(previousRSAAccumulator)
 
 	err := block.CalculateMerkleRoot()
 	if err != nil {
