@@ -1,4 +1,5 @@
 pragma solidity ^0.4.24;
+pragma experimental ABIEncoderV2;
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
@@ -6,7 +7,8 @@ import { IERC20 } from "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 import { IERC721 } from "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
 import { OrderedIntervalList } from "./OrderedIntervalList.sol";
-
+import { SumMerkleProof } from "./SumMerkleProof.sol";
+import { PlasmaDecoder } from "./PlasmaDecoder.sol";
 
 contract PlasmaAssets is Ownable {
   using SafeMath for uint256;
@@ -22,6 +24,8 @@ contract PlasmaAssets is Ownable {
   mapping (address => uint256) private _assetOffsets;
   mapping (address => OrderedIntervalList.Data) private _assetLists;
   mapping (address => bytes32[]) private _allDepositHashes;
+  mapping (bytes32 => bool) private _allWithdrawalHashes;
+  mapping (bytes32 => bool) private _erc721Deposits;
 
   event AssetDeposited(
     address indexed token,
@@ -48,6 +52,18 @@ contract PlasmaAssets is Ownable {
     uint256 tokenId,
     uint64 indexed begin
   );
+
+  event WithdrawalBegin(
+    address owner,
+    uint32 blockIndex,
+    uint32 txIndex,
+    uint8 outputIndex,
+    address assetId,
+    uint64 begin,
+    uint64 end
+  );
+
+  //
 
   constructor() public {
     _assetLists[MAIN_COIN_ASSET_ID].initialize();
@@ -102,8 +118,12 @@ contract PlasmaAssets is Ownable {
 
     emit ERC721Deposited(token, msg.sender, tokenId, begin);
     emit AssetDeposited(ERC721_ASSET_ID, msg.sender, intervalId, begin, end);
+    
     bytes32 hash = keccak256(abi.encodePacked(ERC721_ASSET_ID, msg.sender, intervalId, begin, end));
     _allDepositHashes[msg.sender].push(hash);
+
+    bytes32 erc721Hash = keccak256(abi.encodePacked(token, tokenId, begin));
+    _erc721Deposits[erc721Hash] = true;
   }
 
   function onERC721Received(
@@ -125,27 +145,44 @@ contract PlasmaAssets is Ownable {
 
   // Withdrawals
 
-  // function withdrawalBegin(
-  //   Input point,  
-  //   RSAInclusionProof proof
-  // )
-  //   external
-  //   payable
-  //   returns(bool)
-  // {
-  // }
+  function withdrawalBegin(PlasmaDecoder.Input memory input)
+    public
+    payable //TODO: Bonds
+    returns(bool)
+  {
+    emit WithdrawalBegin(
+      input.owner,
+      input.blockIndex,
+      input.txIndex,
+      input.outputIndex,
+      input.assetId,
+      input.begin,
+      input.end
+    );
+
+    bytes32 inputHash = keccak256(abi.encodePacked(input.owner,
+      input.blockIndex,
+      input.txIndex,
+      input.outputIndex,
+      input.assetId,
+      input.begin,
+      input.end
+    ));
+    _allWithdrawalHashes[inputHash] = true;
+
+    return true;
+  }
 
   // function withdrawalChallangeSpend(
-  //   ExitState state, 
-  //   Transaction tx,
+  //   PlasmaDecoder.Input memory input,
+  //   SumMerkleProof.Proof memory txProof,
   //   uint64 blockIndex,
-  //   SumMerkleProof[] txProof, // serialized to bytes
-  //   uint8 spendIndex,
-  //   RSAInclusionProof spendInclusionProof
+  //   uint8 spendIndex
   // )
-  //   external
+  //   public
   //   returns(bool)
   // {
+  //   return true;
   // }
 
   // function withdrawalChallangeExistance(
@@ -155,11 +192,45 @@ contract PlasmaAssets is Ownable {
   //   uint64 maxBlockIndex,
   //   MerkleProof maxBlockIndexProof
   // )
-  //   external
+  //   public
   //   returns(bool)
   // {
   // }
     
-  // function withdrawalEnd(ExitState state) public {
-  // }
+  function withdrawalEnd(
+    PlasmaDecoder.Input memory input,
+    uint64 intervalId,
+    IERC721 token,
+    uint256 tokenId
+  ) public {
+    bytes32 inputHash = keccak256(abi.encodePacked(input.owner,
+      input.blockIndex,
+      input.txIndex,
+      input.outputIndex,
+      input.assetId,
+      input.begin,
+      input.end
+    ));
+    require(_allWithdrawalHashes[inputHash], "You should start withdrawal first");
+    delete _allWithdrawalHashes[inputHash];
+
+    // Update interval and check it exist
+    _assetLists[input.assetId].remove(intervalId, input.begin, input.end);
+
+    if (input.assetId == MAIN_COIN_ASSET_ID) {
+      input.owner.transfer(uint256(input.end).sub(input.begin).mul(ASSET_DECIMALS_TRUNCATION));
+      return;
+    }
+
+    if (input.assetId == ERC721_ASSET_ID) {
+      require(input.end == input.begin + 1, "It is allowed to withdraw only 1 ERC721 per transaction");
+      bytes32 depositHash = keccak256(abi.encodePacked(token, tokenId, input.begin));
+      require(_erc721Deposits[depositHash], "Invalid token or tokeId arguments");
+      delete _erc721Deposits[depositHash];
+      token.approve(msg.sender, tokenId);
+      return;
+    }
+    
+    IERC20(token).transfer(msg.sender, uint256(input.end).sub(input.begin));
+  }
 }
