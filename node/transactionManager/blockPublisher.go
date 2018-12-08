@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"time"
+	"../ethereum"
 )
 
 const (
@@ -44,5 +45,5 @@ func (p *BlockPublisher) AssembleBlock() {
 		log.Fatalf("Failed to write block: %s", err)
 	}
 
-	// todo push block header to smart contract
+	ethereum.PushHashBlock("8jd982n92d9h3d") // TODO: normal data to block
 }

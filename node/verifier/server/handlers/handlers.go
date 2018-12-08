@@ -60,7 +60,7 @@ func LatestBlockHandler(c *gin.Context) {
 func VerifiersAmountHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
-		"verifiers_amount": "1",
+		"verifiers_amount": "2",
 	})
 }
 
