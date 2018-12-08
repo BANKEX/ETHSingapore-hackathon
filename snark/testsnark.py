@@ -21,8 +21,8 @@ from random import randint
 def genRandProof(depth, x, y):
     index=0
     item = 0
-    begin = x-randint(0, 2**20-1)
-    end = begin+y+randint(0, 2**20-1)
+    begin = x-randint(0, 2**12-1)
+    end = begin+y+randint(0, 2**12-1)
     proofBit=[]
     proofLength=[]
     proofHash=[]
@@ -32,13 +32,13 @@ def genRandProof(depth, x, y):
     for i in range(0, depth):
         b = randint(0, 1)
         ci = randint(0, N-1)
-        cl = randint(0, 2**20-1)
+        cl = randint(0, 2**12-1)
         if i == (depth - 2):
             b = 1
             cl = curLeft
         if i == (depth - 1):
             b = 0
-            cl = 2**32-1-curLength 
+            cl = 2**24-1-curLength 
         proofBit += [b]
         proofLength += [cl]
         proofHash += [ci]
@@ -51,12 +51,12 @@ def genRandProof(depth, x, y):
             curLength +=cl
     return curItem, begin, end, proofHash, proofLength, proofBit
 
-x = randint(2**29, 2**30)
+x = randint(2**21, 2**22)
 y = x + 100
 
 res = []
 for i in range(0,4):
-  res+=[genRandProof(32, x, y)]
+  res+=[genRandProof(16, x, y)]
 
 
 res2 = [x, y]
