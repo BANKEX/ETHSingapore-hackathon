@@ -69,7 +69,7 @@ func ToECDSAPub(pub []byte) *ecdsa.PublicKey {
 // var app App
 // err := json.Unmarshal(data, &app)
 
-// }
+//  }
 
 func TestSig(t *testing.T) {
 	message := "hello"

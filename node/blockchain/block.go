@@ -10,39 +10,16 @@ import (
 	"../plasmautils/primeset"
 	"../plasmautils/slice"
 
-	"../utils"
 	"bytes"
-	"encoding/binary"
-	"encoding/hex"
+
 	"io"
+
+	"../utils"
 
 	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/crypto"
-)
-
-// UnsignedBlockHeader is a structure that signature is calculated for.
-type UnsignedBlockHeader struct {
-	BlockNumber    uint32        `json:"blockNumber"`
-	PreviousHash   Uint256       `json:"previousHash"`
-	MerkleRoot     SumMerkleNode `json:"merkleRoot"`
-	RSAAccumulator Uint2048      `json:"rsaAccumulator"`
-	hash           Uint256       // private variable because it should not be serialized
-}
-
-// BlockHeader is a structure that gets sent to a smart contract.
-type BlockHeader struct {
-	UnsignedBlockHeader
-	Signature Signature `json:"signature"`
-}
-
-// Block is a complete block that gets uploaded to public storage.
-type Block struct {
-	BlockHeader  `json:"header"`
-	Transactions []Transaction `json:"transactions"`
-}
-
 )
 
 // UnsignedBlockHeader is a structure that signature is calculated for.
