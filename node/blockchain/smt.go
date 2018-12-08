@@ -1,6 +1,7 @@
 package blockchain
 
 import (
+	"fmt"
 	"sort"
 
 	. "../alias"
@@ -51,7 +52,7 @@ func Hash4(x1, x2, x3, x4 []byte) Uint160 {
 
 // TODO: check, that slices are conflicting together.
 // TODO: join slices for same transactions
-func SMTBuild(txs []Transaction) *SumMerkleTree {
+func NewSumMerkleTree(txs []Transaction) (*SumMerkleTree, error) {
 	nleaves := 1 << 16
 	nnodes := nleaves*2 - 1
 	t := new(SumMerkleTree)
@@ -65,6 +66,12 @@ func SMTBuild(txs []Transaction) *SumMerkleTree {
 		}
 	}
 	sort.Slice(leaves, func(i, j int) bool { return leaves[i].Begin < leaves[j].Begin })
+
+	for i := 0; i < len(leaves)-1; i++ {
+		if leaves[i].End >= leaves[i+1].Begin {
+			return nil, fmt.Errorf("slices (%d, %d) and (%d, %d) intersect", leaves[i].Begin, leaves[i].End, leaves[i+1].Begin, leaves[i+1].End)
+		}
+	}
 
 	cursorCell := nleaves - 1
 	cursorLeft := uint32(0)
@@ -89,5 +96,5 @@ func SMTBuild(txs []Transaction) *SumMerkleTree {
 		t.NodeList[i].Length = t.NodeList[2*i+1].Length + t.NodeList[2*i+2].Length
 		t.NodeList[i].Hash = Hash4(uint32BE(t.NodeList[2*i+1].Length), uint32BE(t.NodeList[2*i+2].Length), t.NodeList[2*i+1].Hash, t.NodeList[2*i+1].Hash)
 	}
-	return t
+	return t, nil
 }

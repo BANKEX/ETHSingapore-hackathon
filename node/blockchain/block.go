@@ -1,34 +1,29 @@
 package blockchain
 
 import (
-	"encoding/binary"
-	"encoding/hex"
-
 	. "../alias"
 	"../config"
 	"../plasmautils/plasmacrypto"
 	"../plasmautils/primeset"
 	"../plasmautils/slice"
-
-	"bytes"
-
-	"io"
-
 	"../utils"
-
+	"bytes"
+	"encoding/binary"
+	"encoding/hex"
 	"fmt"
-	"math/big"
-
 	"github.com/ethereum/go-ethereum/crypto"
+	"io"
+	"math/big"
 )
 
 // UnsignedBlockHeader is a structure that signature is calculated for.
 type UnsignedBlockHeader struct {
-	BlockNumber    uint32        `json:"blockNumber"`
-	PreviousHash   Uint256       `json:"previousHash"`
-	MerkleRoot     SumMerkleNode `json:"merkleRoot"`
-	RSAAccumulator Uint2048      `json:"rsaAccumulator"`
-	hash           Uint256       // private variable because it should not be serialized
+	BlockNumber    uint32         `json:"blockNumber"`
+	PreviousHash   Uint256        `json:"previousHash"`
+	MerkleRoot     SumMerkleNode  `json:"merkleRoot"`
+	RSAAccumulator Uint2048       `json:"rsaAccumulator"`
+	hash           Uint256        // private variable because it should not be serialized
+	merkleTree     *SumMerkleTree // private variable because it should not be serialized
 }
 
 // BlockHeader is a structure that gets sent to a smart contract.
@@ -116,10 +111,12 @@ func (b *Block) Sign(key []byte) error {
 
 // CalculateMerkleRoot calculates merkle root for transactions in the block.
 func (b *Block) CalculateMerkleRoot() error {
-	// todo
-	//leaves := PrepareLeaves(b.Transactions)
-	//tree := NewSumMerkleTree(leaves)
-	//b.MerkleRoot = tree.GetRoot()
+	tree, err := NewSumMerkleTree(b.Transactions)
+	if err != nil {
+		return err
+	}
+	b.merkleTree = tree
+	b.MerkleRoot = b.merkleTree.NodeList[0] //.GetRoot()
 	return nil
 }
 
