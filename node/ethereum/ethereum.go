@@ -124,8 +124,6 @@ func PushHashBlock(hash string) {
 	}
 }
 
-
-
 func GetLastBlockNumber() string {
 	client, err := ethclient.Dial(config.GetVerifier().GethHost)
 	if err != nil {
@@ -143,5 +141,52 @@ func GetLastBlockNumber() string {
 		log.Fatal(err)
 	}
 
-	 return strconv.Itoa((int)(blockLength.Uint64() - 1))
+	return strconv.Itoa((int)(blockLength.Uint64() - 1))
+}
+
+func Exit() {
+	client, err := ethclient.Dial(config.GetVerifier().GethHost)
+	if err != nil {
+		log.Println(err)
+	}
+
+	privateKey, err := crypto.HexToECDSA(config.GetVerifier().VerifierPrivateKey)
+	if err != nil {
+		log.Println(err)
+	}
+
+	publicKey := privateKey.Public()
+	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
+	if !ok {
+		log.Println("error casting public key to ECDSA")
+	}
+
+	fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
+	nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
+	if err != nil {
+		log.Println(err)
+	}
+
+	gasPrice, err := client.SuggestGasPrice(context.Background())
+	if err != nil {
+		log.Println(err)
+	}
+
+	auth := bind.NewKeyedTransactor(privateKey)
+	auth.Nonce = big.NewInt(int64(nonce))
+	auth.Value = big.NewInt(0)
+	auth.GasLimit = uint64(300000)
+	auth.GasPrice = gasPrice
+
+	address := common.HexToAddress(config.GetVerifier().PlasmaContractAddress)
+	instance, err := store.NewStore(address, client)
+	if err != nil {
+		log.Println(err)
+	}
+
+	tx, err := instance.WithdrawalBegin(auth, nil)
+	if err != nil {
+		log.Println(err)
+	}
+
 }
