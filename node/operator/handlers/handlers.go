@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
 // todo refactor this
@@ -54,6 +55,8 @@ func GetConfig(c *gin.Context) {
 	c.JSON(http.StatusOK, nil)
 }
 
+// ==== debug handlers =====
+
 // returns a list of utxos for an address
 func FundAddress(c *gin.Context) {
 	addr, _ := hex.DecodeString(c.Param("address")[2:])
@@ -66,5 +69,41 @@ func FundAddress(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
-	c.JSON(http.StatusOK, nil)
+	c.String(http.StatusOK, "OK")
+}
+
+func Transact(c *gin.Context) {
+	addr, _ := hex.DecodeString(c.Param("address")[2:])
+	key, _ := hex.DecodeString(c.Param("key")[2:])
+	blockN, _ := strconv.Atoi(c.Param("block"))
+	txN, _ := strconv.Atoi(c.Param("tx"))
+	outN, _ := strconv.Atoi(c.Param("out"))
+
+	in := Manager.GetUtxo(uint32(blockN), uint32(txN), uint32(outN))
+
+	if in == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No such utxo"})
+		return
+	}
+
+	tx := blockchain.Transaction{
+		UnsignedTransaction: blockchain.UnsignedTransaction{
+			Inputs: []blockchain.Input{*in},
+			Outputs: []blockchain.Output{
+				{Owner: addr, Slice: in.Slice},
+			},
+		},
+	}
+	err := tx.Sign(key)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	err = Manager.SubmitTransaction(&tx)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+	c.String(http.StatusOK, "OK")
 }
