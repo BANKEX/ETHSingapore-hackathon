@@ -137,6 +137,11 @@ func (b *Block) UpdateRSAAccumulator(previous Uint2048) {
 	b.RSAAccumulator = acc.Value().Bytes()
 }
 
+func (b *Block) SerializeHeader() []byte {
+	// todo
+	return nil
+}
+
 func (b *Block) Serialize() []byte {
 	// todo
 	return nil

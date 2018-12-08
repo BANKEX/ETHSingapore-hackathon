@@ -1,12 +1,12 @@
 package transactionManager
 
 import (
+	"../ethereum"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"time"
-	"../ethereum"
 )
 
 const (
@@ -45,5 +45,5 @@ func (p *BlockPublisher) AssembleBlock() {
 		log.Fatalf("Failed to write block: %s", err)
 	}
 
-	ethereum.PushHashBlock("8jd982n92d9h3d") // TODO: normal data to block
+	ethereum.PushHashBlock(block.SerializeHeader())
 }
