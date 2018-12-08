@@ -1,6 +1,7 @@
 pragma solidity ^0.4.24;
 
 import { RLPReader } from "solidity-rlp/contracts/RLPReader.sol";
+import { SumMerkleProof } from "./SumMerkleProof.sol";
 
 
 library PlasmaDecoder {
@@ -49,6 +50,10 @@ library PlasmaDecoder {
     Transaction[] transactions;
   }
 
+  function decodeProof(bytes memory rlpBytes) internal pure returns(SumMerkleProof.Proof) {
+    return _decodeProof(rlpBytes.toRlpItem().toList());
+  }
+
   function decodeInput(bytes memory rlpBytes) internal pure returns(Input) {
     return _decodeInput(rlpBytes.toRlpItem().toList());
   }
@@ -74,6 +79,37 @@ library PlasmaDecoder {
   }
 
   // Private methods
+
+  // here is 32-bit plasma
+  struct Slice {
+    uint32 begin;
+    uint32 end;
+  }
+
+  // @dev data ordered from leaves to root. 
+  // @dev index bits: right bit correspond leaves
+  struct Proof {
+    uint32 index;
+    Slice slice;
+    address item;
+    bytes data;
+  }
+
+  function _decodeSlice(RLPReader.RLPItem[] items) private pure returns(SumMerkleProof.Slice) {
+    return SumMerkleProof.Slice({
+      begin: uint32(items[0].toUint()),
+      end: uint32(items[1].toUint())
+    });
+  }
+
+  function _decodeProof(RLPReader.RLPItem[] items) private pure returns(SumMerkleProof.Proof) {
+    return SumMerkleProof.Proof({
+      index: uint32(items[0].toUint()),
+      slice: _decodeSlice(items[1].toList()),
+      item: items[2].toAddress(),
+      data: items[2].toBytes()
+    });
+  }
 
   function _decodeInput(RLPReader.RLPItem[] items) private pure returns(Input) {
     return Input({
