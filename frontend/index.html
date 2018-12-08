@@ -208,8 +208,10 @@
                                          src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Hilbert_curve_2.svg/512px-Hilbert_curve_2.svg.png"
                                          alt=""/>
                                     <br>
-                                    <h4><strong class="header">Total balance:</strong> <span id="balance"></span> WEI</h4>
-                                    <h4><strong class="header">My balance:</strong> <span id="my_balance"></span> WEI</h4>
+                                    <h4><strong class="header">Total balance:</strong> <span id="balance"></span> WEI
+                                    </h4>
+                                    <h4><strong class="header">My balance:</strong> <span id="my_balance"></span> WEI
+                                    </h4>
                                 </div>
                             </div>
                         </div>
@@ -273,148 +275,121 @@
 
 <script>
     const endpoint_url = 'http://localhost:8080';
+    const ITEMS_LEN = "ITEMS_LEN";
 
     async function deposit() {
-        value = getInputData("deposit_amount");
+        value = getInputValue("deposit_amount");
         const result = await getRequest(value, "", "deposit");
-        let i = localStorage.getItem("itemsLength");
-        if (i == undefined) {
-            i = 0;
-        }
+        let i = localStorage.getItem(ITEMS_LEN) || 0;
         let data = JSON.stringify({date: new Date(), val: value, event_type: "Deposit", txHash: result.txHash});
         localStorage.setItem(i, data);
         i++;
-        localStorage.setItem("itemsLength", i);
+        localStorage.setItem(ITEMS_LEN, i);
     }
 
     async function transfer() {
-        value = getInputData("transfer_amount");
-        address = getInputData("transfer_address");
-        const result = await getRequest(value, address, "transfer");
-        let i = localStorage.getItem("itemsLength");
-        if (i == undefined) {
-            i = 0;
-        }
+        value = getInputValue("transfer_amount");
+        address = getInputValue("transfer_address");
+        await getRequest(value, address, "transfer");
+        let i = localStorage.getItem(ITEMS_LEN) || 0;
         let data = JSON.stringify({date: Date.prototype.getDate(), val: value, who: address, event_type: "Transfer"});
         localStorage.setItem(i, data);
         i++;
-        localStorage.setItem("itemsLength", i);
-        console.log(result);
+        localStorage.setItem(ITEMS_LEN, i);
     }
 
     async function exit() {
-        const result = await getRequest("", "", "exit");
-        console.log(result)
+        await getRequest("", "", "exit");
     }
 
-    function getInputData(id) {
+    function getInputValue(id) {
         return document.getElementById(id).value;
     }
 
     async function getRequest(sum, address, api_method) {
-        if (sum != "" && address != "") {
-            const response = await fetch(endpoint_url + '/' + api_method + '/' + address + "/" + sum);
-            if (response.ok === false)
-                return new Error("Error");
-            else
-                return (response.json());
-
-        } else if (address == "" && sum != "") {
-            const response = await fetch(endpoint_url + '/' + api_method + '/' + sum);
-            if (response.ok === false)
-                return new Error("Error");
-            else
-                return (response.json());
+        let response;
+        if (sum !== "" && address !== "") {
+            response = await fetch(endpoint_url + '/' + api_method + '/' + address + "/" + sum);
+        } else if (address === "" && sum !== "") {
+            response = await fetch(endpoint_url + '/' + api_method + '/' + sum);
         } else {
-            const response = await fetch(endpoint_url + '/' + api_method);
-            if (response.ok === false)
-                return new Error("Error");
-            else
-                return (response.json());
+            response = await fetch(endpoint_url + '/' + api_method);
         }
+        return (response.json());
     }
 
     var data = [];
     var event_type = [];
     var amount = [];
 
-    function update() {
-        for (let i = 0; i < localStorage.getItem("itemsLength"); i++) {
+    function get_data_for_table() {
+        for (let i = 0; i < localStorage.getItem(ITEMS_LEN); i++) {
             data.push(JSON.parse(localStorage.getItem(i)).date);
             event_type.push(JSON.parse(localStorage.getItem(i)).event_type);
             amount.push(JSON.parse(localStorage.getItem(i)).val);
+            console.log(data)
+            console.log(event_type)
+            console.log(amount)
         }
     }
 
-    function make_table() {
-        for (let j = 0; j < localStorage.getItem("itemsLength"); j++) {
-            document.getElementById("history").innerHTML += "<tbody>\n" +
-                "                                        <tr>\n" +
-                "                                            <td class=\"text-center\">" + data[j] + "</td>\n" +
-                "                                            <td class=\"text-center\">" + event_type[j] + "</td>\n" +
-                "                                            <td class=\"text-center\">" + amount[j] + "</td>\n" +
-                "                                        </tr>\n" +
-                "                                        </tbody>"
+    function set_data_on_table() {
+        for (let j = 0; j < localStorage.getItem(ITEMS_LEN); j++) {
+            document.getElementById("history").innerHTML +=
+                `<tbody>\n` +
+                `<tr>\n` +
+                `<td class=\"text-center\">${data[j]}</td>\n` +
+                `<td class=\"text-center\"> ${event_type[j]}</td>\n` +
+                `<td class=\"text-center\"> ${amount[j]}</td>\n` +
+                `</tr>\n` +
+                `</tbody>`
         }
     }
 
-    function clear() {
+    function reset_table() {
         document.getElementById("history_table").innerHTML =
-            "                                        <thead>\n" +
-            "                                        <tr>\n" +
-            "                                            <th class=\"text-center\">Date</th>\n" +
-            "                                            <th class=\"text-center\">Type</th>\n" +
-            "                                            <th class=\"text-center\">Sum</th>\n" +
-            "                                        </tr>\n" +
-            "                                        </thead>\n" +
-            "                                        <tbody id=\"history\">\n" +
-            "                                        </tbody>"
+            `<thead>\n` +
+            `<tr>\n` +
+            `<th class=\"text-center\">Date</th>\n` +
+            `<th class=\"text-center\">Type</th>\n` +
+            `<th class=\"text-center\">Sum</th>\n` +
+            `</tr>\n` +
+            `</thead>\n` +
+            `<tbody id=\"history\">\n` +
+            `</tbody>`
     }
 
-    window.setInterval(async function () {
-        let block_number = await block_number_get();
-        let verifiers_amount = await verifiers_amount_get();
-        let balance = await balance_get();
-        let my_balance = await my_balance_get();
-        let contract_address = await contract_address_get();
+    window.setInterval(async () => {
+        document.getElementById("latest_block").innerText = await block_number_get();
+        document.getElementById("verifiers_amount").innerText = await verifiers_amount_get();
+        document.getElementById("balance").innerText = await balance_get();
+        document.getElementById("my_balance").innerText = await my_balance_get();
+        document.getElementById("contract_address").innerText = await contract_address_get();
 
-        document.getElementById("latest_block").innerText = block_number;
-        document.getElementById("verifiers_amount").innerText = verifiers_amount;
-        document.getElementById("balance").innerText = balance;
-        document.getElementById("my_balance").innerText = my_balance;
-        document.getElementById("contract_address").innerText = contract_address;
-
-        clear();
-        update();
-        make_table();
-
+        reset_table();
+        get_data_for_table();
+        set_data_on_table();
     }, 500);
 
     async function contract_address_get() {
-        const result = await getRequest("", "", "contractAddress");
-        return (result.address);
+        return (await getRequest("", "", "contractAddress")).address;
     }
 
     async function my_balance_get() {
-        const result = await getRequest("", "", "etherBalance");
-        return (result.balance);
+        return (await getRequest("", "", "etherBalance")).balance;
     }
 
     async function block_number_get() {
-        const result = await getRequest("", "", "latestBlock");
-        return (result.latest_block_number);
+        return (await getRequest("", "", "latestBlock")).latest_block_number;
     }
 
     async function verifiers_amount_get() {
-        const result = await getRequest("", "", "verifiersAmount");
-        return (result.verifiers_amount);
+        return (await getRequest("", "", "verifiersAmount")).verifiers_amount;
     }
 
     async function balance_get() {
-        const result = await getRequest("", "", "totalBalance");
-        return (result.balance);
+        return (await getRequest("", "", "totalBalance")).balance;
     }
-
 </script>
 </body>
 
