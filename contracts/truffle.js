@@ -44,13 +44,13 @@ module.exports = {
             network_id: 5777,
             gas: 4700000,
             gasPrice: 20000000000
-        },
-        solc: {
-            optimizer: {
-                enabled: true,
-                runs: 200
-            }
-        },
-        migrations_directory: './migrations'
-    }
+        }
+    },
+    solc: {
+        optimizer: {
+            enabled: true,
+            runs: 200
+        }
+    },
+    migrations_directory: './migrations'
 };

@@ -1,5 +1,5 @@
 pragma solidity ^0.4.24;
-pragma experimental ABIEncoderV2;
+pragma experimental ABIEncoderV2; // sed
 
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
@@ -18,7 +18,6 @@ contract PlasmaAssets is Ownable {
   address constant public MAIN_COIN_ASSET_ID = address(0);
   address constant public ERC721_ASSET_ID = address(1);
   uint256 constant public ASSET_DECIMALS_TRUNCATION = 10e13; //TODO: will be different for tokens
-  address constant public MAIN_COIN_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
   bytes32 private _expectedTokenAndTokenIdHash;
   mapping (address => uint256) private _assetOffsets;
@@ -85,10 +84,10 @@ contract PlasmaAssets is Ownable {
 
   function deposit() public payable {
     uint64 amount = uint64(msg.value / ASSET_DECIMALS_TRUNCATION);
-    (uint64 intervalId, uint64 begin, uint64 end) = _assetLists[MAIN_COIN_ADDRESS].append(amount);
+    (uint64 intervalId, uint64 begin, uint64 end) = _assetLists[MAIN_COIN_ASSET_ID].append(amount);
 
     emit CoinDeposited(msg.sender, amount);
-    emit AssetDeposited(MAIN_COIN_ADDRESS, msg.sender, intervalId, begin, end);
+    emit AssetDeposited(MAIN_COIN_ASSET_ID, msg.sender, intervalId, begin, end);
     bytes32 hash = keccak256(abi.encodePacked(msg.sender, amount));
     _allDepositHashes[msg.sender].push(hash);
   }
