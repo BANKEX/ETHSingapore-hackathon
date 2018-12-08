@@ -12,3 +12,4 @@ abigen --abi=BankexPlasma.abi -bin=BankexPlasma.bin --pkg=store --out=plasmacont
 
 cat plasmacontract.go > ../../node/ethereum/plasmacontract/plasmacontract.go
 #rm  plasmacontract.go
+# https://github.com/miguelmota/ethereum-development-with-go-book/blob/master/en/smart-contract-read/README.md
