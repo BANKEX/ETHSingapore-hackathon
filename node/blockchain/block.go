@@ -10,10 +10,9 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/hex"
-	"io"
-
 	"fmt"
 	"github.com/ethereum/go-ethereum/crypto"
+	"io"
 	"math/big"
 )
 
@@ -22,11 +21,12 @@ var WeiPerCoin uint = 1e11
 
 // UnsignedBlockHeader is a structure that signature is calculated for.
 type UnsignedBlockHeader struct {
-	BlockNumber    uint32        `json:"blockNumber"`
-	PreviousHash   Uint256       `json:"previousHash"`
-	MerkleRoot     SumMerkleNode `json:"merkleRoot"`
-	RSAAccumulator Uint2048      `json:"rsaAccumulator"`
-	hash           Uint256       // private variable because it should not be serialized
+	BlockNumber    uint32         `json:"blockNumber"`
+	PreviousHash   Uint256        `json:"previousHash"`
+	MerkleRoot     SumMerkleNode  `json:"merkleRoot"`
+	RSAAccumulator Uint2048       `json:"rsaAccumulator"`
+	hash           Uint256        // private variable because it should not be serialized
+	merkleTree     *SumMerkleTree // private variable because it should not be serialized
 }
 
 // BlockHeader is a structure that gets sent to a smart contract.
@@ -39,13 +39,6 @@ type BlockHeader struct {
 type Block struct {
 	BlockHeader  `json:"header"`
 	Transactions []Transaction `json:"transactions"`
-}
-
-// todo move to merkle tree implementation
-type SumMerkleNode struct {
-	// We use 24 bit
-	Length uint32
-	Hash   Uint160
 }
 
 // NewBlock creates a block from previous block metadata and an array of transaction.
@@ -100,7 +93,7 @@ func (b *Block) calculateHash() error {
 	}
 	hash := crypto.Keccak256(data)
 	if len(hash) != 32 {
-		return fmt.Errorf("wrong hash length %n, expected length: %n", len(hash), 32)
+		return fmt.Errorf("wrong hash length %d, expected length: %d", len(hash), 32)
 	}
 	b.hash = hash
 	return nil
@@ -113,7 +106,7 @@ func (b *Block) Sign(key []byte) error {
 		return err
 	}
 	if len(signature) != 65 {
-		return fmt.Errorf("wrong signature length %n, expected length: %n", len(signature), 65)
+		return fmt.Errorf("wrong signature length %d, expected length: %d", len(signature), 65)
 	}
 	b.Signature = signature
 	return nil
@@ -121,10 +114,12 @@ func (b *Block) Sign(key []byte) error {
 
 // CalculateMerkleRoot calculates merkle root for transactions in the block.
 func (b *Block) CalculateMerkleRoot() error {
-	// todo
-	//leaves := PrepareLeaves(b.Transactions)
-	//tree := NewSumMerkleTree(leaves)
-	//b.MerkleRoot = tree.GetRoot()
+	tree, err := NewSumMerkleTree(b.Transactions)
+	if err != nil {
+		return err
+	}
+	b.merkleTree = tree
+	b.MerkleRoot = b.merkleTree.NodeList[0] //.GetRoot()
 	return nil
 }
 

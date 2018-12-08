@@ -128,3 +128,15 @@ func init1() {
 	}
 	loadFiles()
 }
+
+// func init() {
+// 	if _, err := os.Stat("assets/primedataset"); os.IsNotExist(err) {
+// 		initFiles()
+// 		return
+// 	}
+// 	if _, err := os.Stat("assets/primediffs"); os.IsNotExist(err) {
+// 		initFiles()
+// 		return
+// 	}
+// 	loadFiles()
+// }

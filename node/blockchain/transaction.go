@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
@@ -132,7 +133,7 @@ func (t *Transaction) Sign(key []byte) error {
 		return err
 	}
 	if len(signature) != 65 {
-		return fmt.Errorf("wrong signature length %n, expected length: %n", len(signature), 65)
+		return fmt.Errorf("wrong signature length %d, expected length: %d", len(signature), 65)
 	}
 	t.Signatures = append(t.Signatures, signature)
 	return nil
