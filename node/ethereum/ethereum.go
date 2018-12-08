@@ -78,7 +78,7 @@ func GetBalance(address string) string {
 	return pendingBalance.String()
 }
 
-func PushHashBlock(hash []byte) {
+func PushHashBlock(blockNumber uint32, hash []byte) {
 	client, err := ethclient.Dial(config.GetVerifier().GethHost)
 	if err != nil {
 		log.Println(err)
