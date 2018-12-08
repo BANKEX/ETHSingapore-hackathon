@@ -233,22 +233,18 @@ contract PlasmaBlocks is Ownable {
 
   function submitBlocks(
     uint256 fromIndex,
-    bytes newBlocks,
-    uint256 protectedBlockNumber,
-    address protectedBlockHash
+    bytes newBlocks
   )
     public
     onlyOwner
     returns(uint256)
   {
-    _submitBlocks(fromIndex, newBlocks, protectedBlockNumber, protectedBlockHash);
+    _submitBlocks(fromIndex, newBlocks);
   }
 
   function submitBlocksSigned(
     uint256 fromIndex,
     bytes newBlocks,
-    uint256 protectedBlockNumber,
-    address protectedBlockHash,
     bytes rsv
   )
     public
@@ -257,22 +253,18 @@ contract PlasmaBlocks is Ownable {
     bytes32 messageHash = keccak256(
       abi.encodePacked(
         fromIndex,
-        newBlocks,
-        protectedBlockNumber,
-        protectedBlockHash
+        newBlocks
       )
     );
 
     bytes32 signedHash = ECDSA.toEthSignedMessageHash(messageHash);
     require(owner() == ECDSA.recover(signedHash, rsv), "Invalid signature");
-    return _submitBlocks(fromIndex, newBlocks, protectedBlockNumber, protectedBlockHash);
+    return _submitBlocks(fromIndex, newBlocks);
   }
 
   function _submitBlocks(
     uint256 fromIndex,
-    bytes newBlocks,
-    uint256 protectedBlockNumber,
-    address protectedBlockHash
+    bytes newBlocks
   )
     internal
     returns(uint256)
@@ -280,7 +272,6 @@ contract PlasmaBlocks is Ownable {
     uint256 newBlocksLength = newBlocks.length / 20;
 
     require(fromIndex == _blocks.length, "Invalid fromIndex");
-    require(fromIndex == 0 || _blocks[protectedBlockNumber] == protectedBlockHash, "Wrong protected block number");
 
     uint256 begin = _blocks.length.sub(fromIndex);
     _blocks.length = fromIndex.add(newBlocksLength);
@@ -1155,6 +1146,10 @@ library PlasmaDecoder {
     Transaction[] transactions;
   }
 
+  function decodeProof(bytes memory rlpBytes) internal pure returns(SumMerkleProof.Proof) {
+    return _decodeProof(rlpBytes.toRlpItem().toList());
+  }
+
   function decodeInput(bytes memory rlpBytes) internal pure returns(Input) {
     return _decodeInput(rlpBytes.toRlpItem().toList());
   }
@@ -1180,6 +1175,37 @@ library PlasmaDecoder {
   }
 
   // Private methods
+
+  // here is 32-bit plasma
+  struct Slice {
+    uint32 begin;
+    uint32 end;
+  }
+
+  // @dev data ordered from leaves to root. 
+  // @dev index bits: right bit correspond leaves
+  struct Proof {
+    uint32 index;
+    Slice slice;
+    address item;
+    bytes data;
+  }
+
+  function _decodeSlice(RLPReader.RLPItem[] items) private pure returns(SumMerkleProof.Slice) {
+    return SumMerkleProof.Slice({
+      begin: uint32(items[0].toUint()),
+      end: uint32(items[1].toUint())
+    });
+  }
+
+  function _decodeProof(RLPReader.RLPItem[] items) private pure returns(SumMerkleProof.Proof) {
+    return SumMerkleProof.Proof({
+      index: uint32(items[0].toUint()),
+      slice: _decodeSlice(items[1].toList()),
+      item: items[2].toAddress(),
+      data: items[2].toBytes()
+    });
+  }
 
   function _decodeInput(RLPReader.RLPItem[] items) private pure returns(Input) {
     return Input({
@@ -1270,19 +1296,10 @@ library PlasmaDecoder {
 
 // File: contracts/PlasmaAssets.sol
 
-
-
-
-
-
-
-
-
-
-
 contract PlasmaAssets is Ownable {
   using SafeMath for uint256;
   using SafeERC20 for IERC20;
+  using PlasmaDecoder for bytes;
   using OrderedIntervalList for OrderedIntervalList.Data;
 
   address constant public MAIN_COIN_ASSET_ID = address(0);
@@ -1446,17 +1463,32 @@ contract PlasmaAssets is Ownable {
     return true;
   }
 
-  // function withdrawalChallangeSpend(
-  //   PlasmaDecoder.Input memory input,
-  //   SumMerkleProof.Proof memory txProof,
-  //   uint64 blockIndex,
-  //   uint8 spendIndex
-  // )
-  //   public
-  //   returns(bool)
-  // {
-  //   return true;
-  // }
+  function withdrawalChallangeSpend(
+    bytes memory inputBytes, // PlasmaDecoder.Input
+    bytes memory txProofBytes, // SumMerkleProof.Proof
+    uint64 blockIndex,
+    uint8 spendIndex
+  )
+    public
+    returns(bool)
+  {
+    PlasmaDecoder.Input memory input = inputBytes.decodeInput();
+    SumMerkleProof.Proof memory txProof = txProofBytes.decodeProof();
+
+    bytes32 inputHash = keccak256(abi.encodePacked(input.owner,
+      input.blockIndex,
+      input.txIndex,
+      input.outputIndex,
+      input.assetId,
+      input.begin,
+      input.end
+    ));
+    require(_allWithdrawalHashes[inputHash], "You should start withdrawal first");
+
+    //TODO: check inclusion
+
+    return true;
+  }
 
   // function withdrawalChallangeExistance(
   //   ExitState state,

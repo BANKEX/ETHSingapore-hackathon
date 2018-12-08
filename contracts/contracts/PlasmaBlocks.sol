@@ -22,22 +22,18 @@ contract PlasmaBlocks is Ownable {
 
   function submitBlocks(
     uint256 fromIndex,
-    bytes newBlocks,
-    uint256 protectedBlockNumber,
-    address protectedBlockHash
+    bytes newBlocks
   )
     public
     onlyOwner
     returns(uint256)
   {
-    _submitBlocks(fromIndex, newBlocks, protectedBlockNumber, protectedBlockHash);
+    _submitBlocks(fromIndex, newBlocks);
   }
 
   function submitBlocksSigned(
     uint256 fromIndex,
     bytes newBlocks,
-    uint256 protectedBlockNumber,
-    address protectedBlockHash,
     bytes rsv
   )
     public
@@ -46,22 +42,18 @@ contract PlasmaBlocks is Ownable {
     bytes32 messageHash = keccak256(
       abi.encodePacked(
         fromIndex,
-        newBlocks,
-        protectedBlockNumber,
-        protectedBlockHash
+        newBlocks
       )
     );
 
     bytes32 signedHash = ECDSA.toEthSignedMessageHash(messageHash);
     require(owner() == ECDSA.recover(signedHash, rsv), "Invalid signature");
-    return _submitBlocks(fromIndex, newBlocks, protectedBlockNumber, protectedBlockHash);
+    return _submitBlocks(fromIndex, newBlocks);
   }
 
   function _submitBlocks(
     uint256 fromIndex,
-    bytes newBlocks,
-    uint256 protectedBlockNumber,
-    address protectedBlockHash
+    bytes newBlocks
   )
     internal
     returns(uint256)
@@ -69,7 +61,6 @@ contract PlasmaBlocks is Ownable {
     uint256 newBlocksLength = newBlocks.length / 20;
 
     require(fromIndex == _blocks.length, "Invalid fromIndex");
-    require(fromIndex == 0 || _blocks[protectedBlockNumber] == protectedBlockHash, "Wrong protected block number");
 
     uint256 begin = _blocks.length.sub(fromIndex);
     _blocks.length = fromIndex.add(newBlocksLength);
