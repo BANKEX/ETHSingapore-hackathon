@@ -7,8 +7,10 @@ import (
 	"../plasmautils/primeset"
 	"../plasmautils/slice"
 	"../utils"
+	"bytes"
 	"encoding/binary"
 	"encoding/hex"
+	"io"
 
 	"fmt"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -139,13 +141,22 @@ func (b *Block) UpdateRSAAccumulator(previous Uint2048) {
 }
 
 func (b *Block) SerializeHeader() []byte {
-	result := make([]byte, 0) // can precalculate header length
-	binary.LittleEndian.PutUint32(result, b.BlockNumber)
-	result = append(result, b.PreviousHash...)
-	binary.LittleEndian.PutUint32(result, b.MerkleRoot.Length)
-	result = append(result, b.MerkleRoot.Hash...)
-	result = append(result, b.RSAAccumulator...)
-	return result
+	buf := new(bytes.Buffer)
+	s := io.Writer(buf)
+	_ = binary.Write(s, binary.LittleEndian, b.BlockNumber)
+	buf.Write(b.PreviousHash)
+	_ = binary.Write(s, binary.LittleEndian, b.MerkleRoot.Length)
+	buf.Write(b.MerkleRoot.Hash)
+	buf.Write(b.RSAAccumulator)
+	return buf.Bytes()
+
+	//result := make([]byte, 0, 4 + 32 + 4 + 20 + 256)
+	//binary.LittleEndian.PutUint32(result, b.BlockNumber)
+	//result = append(result, b.PreviousHash...)
+	//binary.LittleEndian.PutUint32(result, b.MerkleRoot.Length)
+	//result = append(result, b.MerkleRoot.Hash...)
+	//result = append(result, b.RSAAccumulator...)
+	//return result
 }
 
 func (b *Block) Serialize() ([]byte, error) {

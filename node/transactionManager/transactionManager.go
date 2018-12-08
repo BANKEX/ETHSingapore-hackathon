@@ -98,6 +98,35 @@ func (p *TransactionManager) AssembleBlock() (*blockchain.Block, error) {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
+	return p.assembleBlockFromTransactions(dereference(p.transactionQueue))
+}
+
+func (p *TransactionManager) AssembleDepositBlock(output blockchain.Output) (*blockchain.Block, error) {
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+
+	t := blockchain.Transaction{
+		UnsignedTransaction: blockchain.UnsignedTransaction{
+			Outputs: []blockchain.Output{
+				output,
+			},
+		},
+	}
+
+	// insert utxo
+	// todo validate input slice
+	in := blockchain.Input{
+		Output:      output,
+		BlockIndex:  p.lastBlock + 1,
+		TxIndex:     0,
+		OutputIndex: 0,
+	}
+	p.utxoIndex[in.GetKey()] = &in
+
+	return p.assembleBlockFromTransactions([]blockchain.Transaction{t})
+}
+
+func (p *TransactionManager) assembleBlockFromTransactions(t []blockchain.Transaction) (*blockchain.Block, error) {
 	block, err := blockchain.NewBlock(p.lastBlock+1, p.lastHash, p.lastAccumulator, dereference(p.transactionQueue))
 	if err != nil {
 		return nil, err

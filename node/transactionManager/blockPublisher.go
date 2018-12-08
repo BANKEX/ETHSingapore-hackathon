@@ -2,7 +2,6 @@ package transactionManager
 
 import (
 	"../blockchain"
-	"../ethereum"
 	"log"
 	"time"
 )
@@ -50,5 +49,6 @@ func (p *BlockPublisher) AssembleBlock() {
 	//	log.Fatalf("Failed to write block: %s", err)
 	//}
 
-	ethereum.PushHashBlock(block.SerializeHeader())
+	// todo
+	// ethereum.PushHashBlock(block.SerializeHeader())
 }

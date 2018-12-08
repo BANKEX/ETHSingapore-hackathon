@@ -11,7 +11,7 @@ import (
 
 func main() {
 	// Assemble block ~ each second
-	manager := &transactionManager.TransactionManager{}
+	manager := transactionManager.NewTransactionManager()
 	transactionManager.NewBlockPublisher(manager)
 	transactionManager.NewEventMonitor(manager)
 
@@ -24,6 +24,9 @@ func main() {
 	r.GET("/config", handlers.GetConfig)
 	r.GET("/status", handlers.GetStatus)
 	r.GET("/utxo/:address", handlers.GetUtxos)
+
+	// debug hendlers
+	r.GET("/fund/:address", handlers.FundAddress)
 
 	err := r.Run(fmt.Sprintf(":%d", config.GetOperator().OperatorPort))
 	if err != nil {

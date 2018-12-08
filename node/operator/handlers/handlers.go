@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"../../blockchain"
+	"../../plasmautils/slice"
 	"../../transactionManager"
+	"encoding/hex"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -49,5 +51,20 @@ func GetStatus(c *gin.Context) {
 // returns contract address and abi
 func GetConfig(c *gin.Context) {
 	// todo not implemented
+	c.JSON(http.StatusOK, nil)
+}
+
+// returns a list of utxos for an address
+func FundAddress(c *gin.Context) {
+	addr, _ := hex.DecodeString(c.Param("address")[2:])
+	out := blockchain.Output{
+		Owner: addr,
+		Slice: slice.Slice{Begin: 10, End: 20},
+	}
+	_, err := Manager.AssembleDepositBlock(out)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
 	c.JSON(http.StatusOK, nil)
 }
