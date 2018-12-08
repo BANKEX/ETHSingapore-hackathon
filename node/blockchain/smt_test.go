@@ -3,6 +3,7 @@ package blockchain
 import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
+	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -32,44 +33,46 @@ func ToECDSAPub(pub []byte) *ecdsa.PublicKey {
 	return &ecdsa.PublicKey{Curve: secp256k1.S256(), X: x, Y: y}
 }
 
-// func testSMT(t * testing.T) {
-// 	//res:=[]Transaction{Transaction{UnsignedTransaction{[]Input{}, []Output{}, Metadata}, []Signature{}}}
-// 	data := []byte(`
-// 	[
-// 		{
-// 			"inputs": [
-// 				{
-// 					"blockNumber":1,
-// 					"txNumber":1,
-// 					"outputNumber":1,
-// 					"owner":[212, 94, 140, 187, 90, 4, 197, 233, 140, 235, 41, 216, 173, 145, 71, 238, 13, 15, 62, 194],
-// 					"slice": {
-// 						"begin": 1,
-// 						"end": 2
-// 					}
-// 				}
+func TestSMT(t *testing.T) {
+	//res:=[]Transaction{Transaction{UnsignedTransaction{[]Input{}, []Output{}, Metadata}, []Signature{}}}
+	data := []byte(`
+	[
+		{
+			"inputs": [
+				{
+					"blockNumber":1,
+					"txNumber":1,
+					"outputNumber":1,
+					"owner":[212, 94, 140, 187, 90, 4, 197, 233, 140, 235, 41, 216, 173, 145, 71, 238, 13, 15, 62, 194],
+					"slice": {
+						"begin": 1,
+						"end": 2
+					}
+				}
 
-// 			],
-// 			"outputs": [
-// 				{
-// 					"owner":[212, 94, 140, 187, 90, 4, 197, 233, 140, 235, 41, 216, 173, 145, 71, 238, 13, 15, 62, 194],
-// 					"slice": {
-// 						"begin": 1,
-// 						"end": 2
-// 					}
-// 				}
-// 			],
-// 			"metadata": {
+			],
+			"outputs": [
+				{
+					"owner":[212, 94, 140, 187, 90, 4, 197, 233, 140, 235, 41, 216, 173, 145, 71, 238, 13, 15, 62, 194],
+					"slice": {
+						"begin": 1,
+						"end": 2
+					}
+				}
+			],
+			"metadata": {
+				"maxBlockNumber":100
+			}
+		}
+	]
+	`)
 
-// 			}
-// 		}
-// 	]
-// 	`)
+	q := make([]Transaction, 0)
+	json.Unmarshal(data, &q)
+	_ = q
+	fmt.Println(q)
 
-// var app App
-// err := json.Unmarshal(data, &app)
-
-//  }
+}
 
 func TestSig(t *testing.T) {
 	message := "hello"

@@ -18,11 +18,48 @@ type SumMerkleTree struct {
 	NodeList []SumMerkleNode
 }
 
+type SumMerkleProof struct {
+	Index    uint32
+	Slice    Slice
+	Hash     Uint160
+	NodeList []SumMerkleNode
+}
+
 // func uint160ToUint256(Uint160 n) Uint256 {
 // 	res := make(byte, 256)
 // 	res[96:256] = n[:]
 // 	return res
 // }
+
+func (t SumMerkleTree) GetRoot() SumMerkleNode {
+	return t.NodeList[0]
+}
+
+func (t SumMerkleTree) GetLeaves() []SumMerkleNode {
+	return t.NodeList[1<<16-1 : 1<<17-1]
+}
+
+func (t SumMerkleTree) MerkleProof(Index uint32) SumMerkleProof {
+	res := *new(SumMerkleProof)
+	res.Index = Index
+	left := uint32(0)
+
+	curCell := 1<<16 - 1 + Index
+	length := t.NodeList[curCell].Length
+	res.Hash = t.NodeList[curCell].Hash
+
+	for curCell > 0 {
+		if (curCell & 1) == 0 {
+			res.NodeList = append(res.NodeList, t.NodeList[curCell-1])
+			left += t.NodeList[curCell-1].Length
+		} else {
+			res.NodeList = append(res.NodeList, t.NodeList[curCell+1])
+		}
+		curCell = (curCell - 1) >> 1
+	}
+	res.Slice = Slice{left, left + length}
+	return res
+}
 
 func uint32BE(n uint32) []byte {
 	return []byte{byte(n >> 24), byte(n >> 16), byte(n >> 8), byte(n)}
