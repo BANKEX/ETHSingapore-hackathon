@@ -4,11 +4,17 @@ import (
 	"../../../blockchain"
 	"../../../config"
 	"../../../ethereum"
+	"../../../plasmautils/slice"
+	"bytes"
+	"encoding/hex"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 )
 
 var sumRes uint
@@ -59,12 +65,55 @@ func DepositHandler(c *gin.Context) {
 }
 
 func TransferHandler(c *gin.Context) {
-	address := c.Param("address")
-	sum := c.Param("sum")
+	address, _ := hex.DecodeString(c.Param("address")[2:])
+	usum, _ := strconv.Atoi(c.Param("sum"))
+	sum := uint32(usum)
+	in := new(blockchain.Input)
+	c.BindJSON(&in)
+
+	uTx := blockchain.Transaction{
+		UnsignedTransaction: blockchain.UnsignedTransaction{
+			Inputs: []blockchain.Input{*in},
+			Outputs: []blockchain.Output{
+				{
+					Owner: address,
+					Slice: slice.Slice{
+						Begin: in.Slice.Begin,
+						End:   in.Slice.Begin + sum,
+					},
+				},
+			},
+		},
+	}
+
+	if in.Slice.End-in.Slice.Begin > sum {
+		uTx.Outputs = append(uTx.Outputs, blockchain.Output{
+			Owner: in.Owner,
+			Slice: slice.Slice{
+				Begin: in.Slice.Begin + sum + 1,
+				End:   in.Slice.End,
+			},
+		})
+	}
+
+	key, _ := hex.DecodeString(config.GetVerifier().VerifierPrivateKey)
+
+	uTx.Sign(key)
+
+	port := strconv.Itoa(config.GetOperator().OperatorPort)
+
+	b := new(bytes.Buffer)
+	json.NewEncoder(b).Encode(uTx)
+	res, _ := http.Post("http://localhost:"+port+"/tx", "application/json; charset=utf-8", b)
+	io.Copy(os.Stdout, res.Body)
 
 	c.JSON(http.StatusOK, gin.H{
-		"status": address + sum,
+		"status": res.Body,
 	})
+}
+
+func makeUnsignedTx() {
+
 }
 
 func ExitHandler(c *gin.Context) {

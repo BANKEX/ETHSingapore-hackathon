@@ -19,8 +19,8 @@ type OperatorConfig struct {
 }
 
 type VerifierConfig struct {
-	VerifierPort          int    `env:"verifier_port" envDefault:"2000"`                                                                        // port where verifier server runs
-	VerifierPrivateKey    string `env:"main_account_private_key" envDefault:"e4058d9c3a81b4e95d8e3a17a5f52486a7fc411e57dcd4f6c771dbc2428928e9"` // private key of account who deploy plasma contract and who push blocks to it (operator)
+	VerifierPort          int    `env:"verifier_port" envDefault:"8080"`                                                                        // port where verifier server runs
+	VerifierPrivateKey    string `env:"main_account_private_key" envDefault:"0x240d6ad83930067d82e0803696996f743acd78d8fa6a5f6e4f148fd9def37c55"` // private key of account who deploy plasma contract and who push blocks to it (operator)
 	VerifierPublicKey     string `env:"main_account_public_key" envDefault:"0x9cA4E1F69A3ABD60989864FAd1025095dFCC58F1"`                        // public key of account who deploy plasma contract and who push blocks to it (operator)
 	PlasmaContractAddress string `env:"plasma_contract_address" envDefault:"0xf640234fa4935a04ef8b6b83d1d8a57010ceb25d"`                        // address of plasma smart contract
 	GethHost              string `env:"geth_host" envDefault:"ws://127.0.0.1:8545"`

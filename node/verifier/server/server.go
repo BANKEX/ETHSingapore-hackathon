@@ -8,9 +8,9 @@ import (
 
 func GinServer() {
 
-	//r := gin.Default()
-	r := gin.New()
-	r.Use(gin.Recovery())
+	r := gin.Default()
+	//r := gin.New()
+	//r.Use(gin.Recovery())
 	r.Use(cors.Default())
 	gin.SetMode(gin.ReleaseMode)
 
@@ -19,7 +19,7 @@ func GinServer() {
 	r.GET("/totalBalance", handlers.TotalBalanceHandler)
 	r.GET("/contractAddress", handlers.PlasmaContractAddress)
 	r.GET("/deposit/:sum", handlers.DepositHandler)
-	r.GET("/transfer/:address/:sum", handlers.TransferHandler) //
+	r.POST("/transfer/:address/:sum", handlers.TransferHandler) //
 	r.GET("/plasmaBalance", handlers.PlasmaBalance) //
 	r.GET("/exit", handlers.ExitHandler) //
 	r.GET("/latestBlock", handlers.LatestBlockHandler) //

@@ -292,14 +292,31 @@
         value = getInputValue("transfer_amount");
         address = getInputValue("transfer_address");
         realValue = (value / 1e11);
-        console.log(realValue);
-        await getRequest(value, address, "transfer");
+        oldInput = await plasma_balance_get();
+
+        await fetch(endpoint_url + "/transfer/" + address + "/" + realValue, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            method: "POST",
+            body: JSON.stringify(oldInput)
+        });
+
+
         let i = localStorage.getItem(ITEMS_LEN) || 0;
-        let data = JSON.stringify({date: new Date(), val: realValue, who: address, event_type: "Transfer"});
+        let data = JSON.stringify({
+            date: new Date(),
+            val: realValue,
+            who: address,
+            event_type: "Transfer",
+            input: oldInput
+        });
         localStorage.setItem(i, data);
         i++;
         localStorage.setItem(ITEMS_LEN, i);
     }
+
 
     async function exit() {
         await getRequest("", "", "exit");
@@ -373,7 +390,7 @@
         reset_table();
         get_data_for_table();
         set_data_on_table();
-    }, 500);
+    }, 50000);
 
     async function contract_address_get() {
         return (await getRequest("", "", "contractAddress")).address;
@@ -404,6 +421,8 @@
         }
         return sum
     }
+
+
 </script>
 </body>
 
