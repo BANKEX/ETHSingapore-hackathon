@@ -96,6 +96,11 @@ func (t *UnsignedTransaction) GetMerkleRoot() Uint160 {
 	return []byte(tree.GetRoot())
 }
 
+// Pads 20 byte hash to 32 bytes with zeros
+func PadHash(in Uint160) Uint256 {
+	return append(make([]byte, 12), in...)
+}
+
 // GetSignaturesHash returns a hash of concatenated signatures.
 func (t *Transaction) GetSignaturesHash() Uint160 {
 	result := make([]byte, 0, 65*len(t.Signatures))
@@ -118,7 +123,7 @@ func (t *Transaction) GetHash() Uint160 {
 // This function will append the generated signature to transactions' Signatures array.
 func (t *Transaction) Sign(key []byte) error {
 	hash := t.GetHash()
-	signature, err := utils.Sign(hash, key)
+	signature, err := utils.Sign(PadHash(hash), key)
 	if err != nil {
 		return err
 	}
@@ -161,11 +166,16 @@ func (t *Transaction) ValidateSignatures() error {
 	for _, owner := range t.GetInputOwners() {
 		signed := false
 		for _, sig := range t.Signatures {
-			o, err := crypto.Ecrecover(t.GetHash(), sig)
+			pubkey, err := crypto.Ecrecover(PadHash(t.GetHash()), sig)
 			if err != nil {
 				return err
 			}
-			if bytes.Compare(owner, o) == 0 {
+			key, err := crypto.UnmarshalPubkey(pubkey)
+			if err != nil {
+				return err
+			}
+			addr := crypto.PubkeyToAddress(*key).Bytes()
+			if bytes.Compare(owner, addr) == 0 {
 				signed = true
 				break
 			}

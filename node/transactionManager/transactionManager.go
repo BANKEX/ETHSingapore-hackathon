@@ -156,5 +156,9 @@ func (p *TransactionManager) GetLastBlockNumber() uint32 {
 	return p.lastBlock
 }
 
+func (p *TransactionManager) GetUtxo(block, tx, output uint32) *blockchain.Input {
+	return p.utxoIndex[fmt.Sprintf("%d:%d:%d", block, tx, output)]
+}
+
 // todo add utxo on deposit event, avoid double deposits
 // todo spend utxo on withdraw event
