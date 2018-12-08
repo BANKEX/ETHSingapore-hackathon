@@ -3,7 +3,7 @@
 Plasma Cashflow with history reduction with zk-SNARKS.
 
 What have we done here?
-1. Plasma cashflow https://hackmd.io/DgzmJIRjSzCYvl4lUjZXNQ?view
+1. Plasma cashflow, based on specs https://hackmd.io/DgzmJIRjSzCYvl4lUjZXNQ?view and https://ethresear.ch/t/plasma-prime-design-proposal/4222
 2. History voids compression on zkSNARK 
 
 Overview more about voids and history reduction here:
