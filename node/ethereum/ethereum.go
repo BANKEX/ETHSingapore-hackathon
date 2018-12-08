@@ -11,6 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"log"
 	"math/big"
+	"strconv"
 )
 
 //func Deposit(sum string) string {
@@ -123,6 +124,24 @@ func PushHashBlock(hash string) {
 	}
 }
 
-func GetLastBlockNumber() {
 
+
+func GetLastBlockNumber() string {
+	client, err := ethclient.Dial(config.GetVerifier().GethHost)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	address := common.HexToAddress(config.GetVerifier().PlasmaContractAddress)
+	instance, err := store.NewStore(address, client)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	blockLength, err := instance.BlocksLength(nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	 return strconv.Itoa((int)(blockLength.Uint64() - 1))
 }
