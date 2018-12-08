@@ -40,7 +40,11 @@ func (p *BlockPublisher) AssembleBlock() {
 	}
 
 	// upload to a durable storage (S3/IPFS) or write to a local file system
-	err = ioutil.WriteFile(fmt.Sprintf("./blockchain/%d.bin", block.BlockNumber), block.Serialize(), os.FileMode(666))
+	data, err := block.Serialize()
+	if err != nil {
+		log.Fatalf("Failed to write block: %s", err)
+	}
+	err = ioutil.WriteFile(fmt.Sprintf("./blockchain/%d.bin", block.BlockNumber), data, os.FileMode(666))
 	if err != nil {
 		log.Fatalf("Failed to write block: %s", err)
 	}

@@ -148,9 +148,9 @@ func (b *Block) SerializeHeader() []byte {
 	return result
 }
 
-func (b *Block) Serialize() []byte {
+func (b *Block) Serialize() ([]byte, error) {
 	// todo
-	return nil
+	return utils.EncodeToRLP(b)
 }
 
 func Deserialize(data []byte) *Block {
