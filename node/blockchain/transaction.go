@@ -123,7 +123,6 @@ func (t *Transaction) GetHash() Uint160 {
 // Signs a transaction with a specified private key.
 // This function will append the generated signature to transactions' Signatures array.
 func (t *Transaction) Sign(key []byte) error {
-	fmt.Println(PadHash(t.GetMerkleRoot()))
 	privateKey, err := crypto.ToECDSA(key)
 	if err != nil {
 		return err
@@ -168,7 +167,6 @@ func (t *Transaction) ValidateSlices() error {
 
 // ValidateSignatures checks that the transaction is properly signed.
 func (t *Transaction) ValidateSignatures() error {
-	fmt.Println(PadHash(t.GetMerkleRoot()))
 	for _, owner := range t.GetInputOwners() {
 		signed := false
 		for _, sig := range t.Signatures {
