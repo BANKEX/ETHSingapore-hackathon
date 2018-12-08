@@ -17,6 +17,9 @@ import (
 	"math/big"
 )
 
+
+var WeiPerCoin uint = 1e11
+
 // UnsignedBlockHeader is a structure that signature is calculated for.
 type UnsignedBlockHeader struct {
 	BlockNumber    uint32        `json:"blockNumber"`

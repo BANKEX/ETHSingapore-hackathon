@@ -209,7 +209,9 @@
                                     <br>
                                     <h3><strong class="header">Total plasma balance:</strong></h3>
                                     <h4><span id="balance"></span> WEI</h4>
-                                    <h3><strong class="header">My balance:</strong></h3>
+                                    <h3><strong class="header">Total Plasma balance:</strong></h3>
+                                    <h4><span id="my_plasma_balance"></span> WEI</h4>
+                                    <h3><strong class="header">My Ethereum balance:</strong></h3>
                                     <h4><span id="my_balance"></span> WEI</h4>
                                 </div>
                             </div>
@@ -289,9 +291,11 @@
     async function transfer() {
         value = getInputValue("transfer_amount");
         address = getInputValue("transfer_address");
+        realValue = (value / 1e11);
+        console.log(realValue);
         await getRequest(value, address, "transfer");
         let i = localStorage.getItem(ITEMS_LEN) || 0;
-        let data = JSON.stringify({date: new Date(), val: value, who: address, event_type: "Transfer"});
+        let data = JSON.stringify({date: new Date(), val: realValue, who: address, event_type: "Transfer"});
         localStorage.setItem(i, data);
         i++;
         localStorage.setItem(ITEMS_LEN, i);
@@ -335,27 +339,27 @@
     function set_data_on_table() {
         for (let j = 0; j < localStorage.getItem(ITEMS_LEN); j++) {
             document.getElementById("history").innerHTML +=
-                `<tbody>\n` +
-                `<tr>\n` +
-                `<td class=\"text-center\">${data[j]}</td>\n` +
-                `<td class=\"text-center\"> ${event_type[j]}</td>\n` +
-                `<td class=\"text-center\"> ${amount[j]}</td>\n` +
-                `</tr>\n` +
-                `</tbody>`
+                    `<tbody>\n` +
+                    `<tr>\n` +
+                    `<td class=\"text-center\">${data[j]}</td>\n` +
+                    `<td class=\"text-center\"> ${event_type[j]}</td>\n` +
+                    `<td class=\"text-center\"> ${amount[j]}</td>\n` +
+                    `</tr>\n` +
+                    `</tbody>`
         }
     }
 
     function reset_table() {
         document.getElementById("history_table").innerHTML =
-            `<thead>\n` +
-            `<tr>\n` +
-            `<th class=\"text-center\">Date</th>\n` +
-            `<th class=\"text-center\">Type</th>\n` +
-            `<th class=\"text-center\">Sum</th>\n` +
-            `</tr>\n` +
-            `</thead>\n` +
-            `<tbody id=\"history\">\n` +
-            `</tbody>`
+                `<thead>\n` +
+                `<tr>\n` +
+                `<th class=\"text-center\">Date</th>\n` +
+                `<th class=\"text-center\">Type</th>\n` +
+                `<th class=\"text-center\">Sum</th>\n` +
+                `</tr>\n` +
+                `</thead>\n` +
+                `<tbody id=\"history\">\n` +
+                `</tbody>`
     }
 
     window.setInterval(async () => {
@@ -364,6 +368,7 @@
         document.getElementById("balance").innerText = await balance_get();
         document.getElementById("my_balance").innerText = await my_balance_get();
         document.getElementById("contract_address").innerText = await contract_address_get();
+        document.getElementById("my_plasma_balance").innerText = await plasma_balance_get();
 
         reset_table();
         get_data_for_table();
@@ -379,7 +384,7 @@
     }
 
     async function block_number_get() {
-        return (await getRequest("", "", "latestBlock")).replace(/\D+/g,"");
+        return (await getRequest("", "", "latestBlock")).replace(/\D+/g, "");
     }
 
     async function verifiers_amount_get() {
@@ -388,6 +393,16 @@
 
     async function balance_get() {
         return (await getRequest("", "", "totalBalance")).balance;
+    }
+
+
+    async function plasma_balance_get() {
+        let res = (await getRequest("", "", "plasmaBalance"));
+        let sum = 0;
+        for (let i = 0; i < res.length; i++) {
+            sum += (res[i].slice.End - res[i].slice.Begin) * (1e11)
+        }
+        return sum
     }
 </script>
 </body>

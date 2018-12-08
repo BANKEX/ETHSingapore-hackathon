@@ -117,7 +117,7 @@ func ProofN(i int) []*crypto.Cipher {
 	return res
 }
 
-func init() {
+func init1() {
 	if _, err := os.Stat("assets/primedataset"); os.IsNotExist(err) {
 		initFiles()
 		return

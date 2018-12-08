@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"../../../blockchain"
 	"../../../config"
 	"../../../ethereum"
 	"encoding/json"
@@ -10,6 +11,8 @@ import (
 	"net/http"
 )
 
+var sumRes uint
+
 func EthereumBalance(c *gin.Context) {
 	response := ethereum.GetBalance(config.GetVerifier().VerifierPublicKey)
 	c.JSON(http.StatusOK, gin.H{
@@ -18,9 +21,28 @@ func EthereumBalance(c *gin.Context) {
 }
 
 func PlasmaBalance(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"balance": "0",
-	})
+
+	st := make([]blockchain.Input, 0)
+
+	resp, err := http.Get("http://localhost:3001/utxo/" + config.GetVerifier().VerifierPublicKey)
+	if err != nil {
+		log.Println(err)
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println(err)
+	}
+	err = json.Unmarshal(body, &st)
+	if err != nil {
+		log.Println(err)
+	}
+
+	//for _, tx := range st {
+	//	sumRes = (tx.Slice.End - tx.Slice.Begin) * blockchain.WeiPerCoin
+	//}
+
+	c.JSON(http.StatusOK, st)
 }
 
 func PlasmaContractAddress(c *gin.Context) {
@@ -52,11 +74,12 @@ func ExitHandler(c *gin.Context) {
 }
 
 var id = 0
+
 type Resp struct {
 	LatestBlock string `json:"lastBlock"`
 }
-func LatestBlockHandler(c *gin.Context) {
 
+func LatestBlockHandler(c *gin.Context) {
 	st := Resp{}
 	resp, err := http.Get("http://localhost:3001/status")
 	if err != nil {
@@ -76,7 +99,6 @@ func LatestBlockHandler(c *gin.Context) {
 }
 
 func VerifiersAmountHandler(c *gin.Context) {
-
 	c.JSON(http.StatusOK, gin.H{
 		"verifiers_amount": "2",
 	})
@@ -84,7 +106,7 @@ func VerifiersAmountHandler(c *gin.Context) {
 
 func TotalBalanceHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
-		"balance": "60000000000000000000000",
+		"balance": 1677721600000000000,
 	})
 }
 
