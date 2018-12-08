@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd ../contracts
+cd ././../contracts/
 
 # clear abi before compiling new
 sudo rm -rf build

@@ -27,9 +27,9 @@ func PlasmaContractAddress(c *gin.Context) {
 }
 
 func DepositHandler(c *gin.Context) {
-	//result := ethereum.Deposit(c.Param("sum"))
+	result := ethereum.Deposit(c.Param("sum"))
 	c.JSON(http.StatusOK, gin.H{
-		"txHash": "o",
+		"txHash": result,
 	})
 }
 
@@ -63,7 +63,6 @@ func VerifiersAmountHandler(c *gin.Context) {
 		"verifiers_amount": "2",
 	})
 }
-
 
 func TotalBalanceHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
