@@ -24,7 +24,7 @@ func GinServer() {
 	r.GET("/exit", handlers.ExitHandler) //
 	r.GET("/latestBlock", handlers.LatestBlockHandler) //
 
-	r.Static("/front", "frontend")
+	r.Static("/frontend", "frontend")
 
 	r.Run(":8080")
 }
