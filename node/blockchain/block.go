@@ -7,6 +7,7 @@ import (
 	"../plasmautils/primeset"
 	"../plasmautils/slice"
 	"../utils"
+	"encoding/binary"
 	"encoding/hex"
 
 	"fmt"
@@ -138,8 +139,13 @@ func (b *Block) UpdateRSAAccumulator(previous Uint2048) {
 }
 
 func (b *Block) SerializeHeader() []byte {
-	// todo
-	return nil
+	result := make([]byte, 0) // can precalculate header length
+	binary.LittleEndian.PutUint32(result, b.BlockNumber)
+	result = append(result, b.PreviousHash...)
+	binary.LittleEndian.PutUint32(result, b.MerkleRoot.Length)
+	result = append(result, b.MerkleRoot.Hash...)
+	result = append(result, b.RSAAccumulator...)
+	return result
 }
 
 func (b *Block) Serialize() []byte {
