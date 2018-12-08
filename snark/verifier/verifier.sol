@@ -211,7 +211,7 @@ contract Verifier {
             uint[2] h,
             uint[2] k,
             uint[3] input
-        ) public returns (bool r) {
+        ) public view returns (bool r) {
         Proof memory proof;
         proof.A = Pairing.G1Point(a[0], a[1]);
         proof.A_p = Pairing.G1Point(a_p[0], a_p[1]);
