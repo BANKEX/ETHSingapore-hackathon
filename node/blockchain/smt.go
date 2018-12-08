@@ -129,7 +129,7 @@ func NewSumMerkleTree(txs []Transaction) (*SumMerkleTree, error) {
 		cursorCell++
 	}
 
-	for i := nleaves - 2; i >= 0; i++ {
+	for i := nleaves - 2; i >= 0; i-- {
 		t.NodeList[i].Length = t.NodeList[2*i+1].Length + t.NodeList[2*i+2].Length
 		t.NodeList[i].Hash = Hash4(uint32BE(t.NodeList[2*i+1].Length), uint32BE(t.NodeList[2*i+2].Length), t.NodeList[2*i+1].Hash, t.NodeList[2*i+1].Hash)
 	}
