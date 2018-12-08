@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
 	"time"
 )
 
@@ -44,7 +43,7 @@ func (p *BlockPublisher) AssembleBlock() {
 	if err != nil {
 		log.Fatalf("Failed to write block: %s", err)
 	}
-	err = ioutil.WriteFile(fmt.Sprintf("./blockchain/%d.bin", block.BlockNumber), data, os.FileMode(666))
+	err = ioutil.WriteFile(fmt.Sprintf("./blockchain/%d.bin", block.BlockNumber), data, 0666)
 	if err != nil {
 		log.Fatalf("Failed to write block: %s", err)
 	}

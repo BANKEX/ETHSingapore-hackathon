@@ -123,5 +123,9 @@ func (p *TransactionManager) GetUtxosForAddress(address string) ([]*blockchain.I
 	return result, nil
 }
 
+func (p *TransactionManager) GetLastBlockNumber() uint32 {
+	return p.lastBlock
+}
+
 // todo add utxo on deposit event, avoid double deposits
 // todo spend utxo on withdraw event
