@@ -1,9 +1,8 @@
 package transactionManager
 
 import (
+	"../blockchain"
 	"../ethereum"
-	"fmt"
-	"io/ioutil"
 	"log"
 	"time"
 )
@@ -11,6 +10,8 @@ import (
 const (
 	blockInterval = 10 * time.Second
 )
+
+var Blockchain []*blockchain.Block
 
 type BlockPublisher struct {
 	transactionManager *TransactionManager
@@ -39,14 +40,15 @@ func (p *BlockPublisher) AssembleBlock() {
 	}
 
 	// upload to a durable storage (S3/IPFS) or write to a local file system
-	data, err := block.Serialize()
-	if err != nil {
-		log.Fatalf("Failed to write block: %s", err)
-	}
-	err = ioutil.WriteFile(fmt.Sprintf("./blockchain/%d.bin", block.BlockNumber), data, 0666)
-	if err != nil {
-		log.Fatalf("Failed to write block: %s", err)
-	}
+	Blockchain = append(Blockchain, block)
+	//data, err := block.Serialize()
+	//if err != nil {
+	//	log.Fatalf("Failed to write block: %s", err)
+	//}
+	//err = ioutil.WriteFile(fmt.Sprintf("./blockchain/%d.bin", block.BlockNumber), data, 0666)
+	//if err != nil {
+	//	log.Fatalf("Failed to write block: %s", err)
+	//}
 
 	ethereum.PushHashBlock(block.SerializeHeader())
 }
