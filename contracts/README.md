@@ -7,3 +7,11 @@
 
 1. Install packages with `npm install`
 2. Run tests with `npm test`
+
+
+# Run verifier and frontend
+
+1. Run ganache / geth node on 8545
+2. Deploy Bankex Plasma contract, you can do it with abigen.sh
+3. Copy Bankex Plasma address to node/config/config.go
+4. go to localhost:8080/front

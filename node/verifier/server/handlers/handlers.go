@@ -27,9 +27,9 @@ func PlasmaContractAddress(c *gin.Context) {
 }
 
 func DepositHandler(c *gin.Context) {
-	result := ethereum.Deposit(c.Param("sum"))
+	//result := ethereum.Deposit(c.Param("sum"))
 	c.JSON(http.StatusOK, gin.H{
-		"txHash": result,
+		"txHash": "o",
 	})
 }
 
