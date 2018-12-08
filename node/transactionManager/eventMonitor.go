@@ -79,7 +79,10 @@ func (m *EventMonitor) processLogs(logs []types.Log) error {
 	for _, vLog := range logs {
 		for _, h := range eventHandlers.Handlers {
 			if crypto.Keccak256Hash([]byte(h.Signature)).Hex() == vLog.Topics[0].Hex() {
-				h.Handler(vLog.Data)
+				for range vLog.Topics {
+					h.Handler(vLog.Data)
+				}
+
 			}
 		}
 	}
