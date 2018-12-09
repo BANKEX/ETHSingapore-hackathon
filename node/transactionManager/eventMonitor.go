@@ -2,14 +2,17 @@ package transactionManager
 
 import (
 	"../config"
+	"../ethereum/plasmacontract"
 	"./eventHandlers"
 	"context"
 	"github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"math/big"
+	"strings"
 )
 
 const (
@@ -71,16 +74,16 @@ func (m *EventMonitor) processBlock(blockNumber int64) (int, error) {
 }
 
 func (m *EventMonitor) processLogs(logs []types.Log) error {
-	//contractAbi, err := abi.JSON(strings.NewReader(config.GetOperator().GetABI()))
-	//if err != nil {
-	//	return err
-	//}
+	contractAbi, err := abi.JSON(strings.NewReader(store.StoreABI))
+	if err != nil {
+		return err
+	}
 
 	for _, vLog := range logs {
 		for _, h := range eventHandlers.Handlers {
 			if crypto.Keccak256Hash([]byte(h.Signature)).Hex() == vLog.Topics[0].Hex() {
 				for range vLog.Topics {
-					h.Handler(vLog.Data)
+					h.Handler(vLog, contractAbi)
 				}
 
 			}
