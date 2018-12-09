@@ -142,161 +142,6 @@ contract Ownable {
   }
 }
 
-// File: openzeppelin-solidity/contracts/cryptography/ECDSA.sol
-
-/**
- * @title Elliptic curve signature operations
- * @dev Based on https://gist.github.com/axic/5b33912c6f61ae6fd96d6c4a47afde6d
- * TODO Remove this library once solidity supports passing a signature to ecrecover.
- * See https://github.com/ethereum/solidity/issues/864
- */
-
-library ECDSA {
-
-  /**
-   * @dev Recover signer address from a message by using their signature
-   * @param hash bytes32 message, the hash is the signed message. What is recovered is the signer address.
-   * @param signature bytes signature, the signature is generated using web3.eth.sign()
-   */
-  function recover(bytes32 hash, bytes signature)
-    internal
-    pure
-    returns (address)
-  {
-    bytes32 r;
-    bytes32 s;
-    uint8 v;
-
-    // Check the signature length
-    if (signature.length != 65) {
-      return (address(0));
-    }
-
-    // Divide the signature in r, s and v variables
-    // ecrecover takes the signature parameters, and the only way to get them
-    // currently is to use assembly.
-    // solium-disable-next-line security/no-inline-assembly
-    assembly {
-      r := mload(add(signature, 0x20))
-      s := mload(add(signature, 0x40))
-      v := byte(0, mload(add(signature, 0x60)))
-    }
-
-    // Version of signature should be 27 or 28, but 0 and 1 are also possible versions
-    if (v < 27) {
-      v += 27;
-    }
-
-    // If the version is correct return the signer address
-    if (v != 27 && v != 28) {
-      return (address(0));
-    } else {
-      // solium-disable-next-line arg-overflow
-      return ecrecover(hash, v, r, s);
-    }
-  }
-
-  /**
-   * toEthSignedMessageHash
-   * @dev prefix a bytes32 value with "\x19Ethereum Signed Message:"
-   * and hash the result
-   */
-  function toEthSignedMessageHash(bytes32 hash)
-    internal
-    pure
-    returns (bytes32)
-  {
-    // 32 is the length in bytes of hash,
-    // enforced by the type signature above
-    return keccak256(
-      abi.encodePacked("\x19Ethereum Signed Message:\n32", hash)
-    );
-  }
-}
-
-// File: contracts/PlasmaBlocks.sol
-
-contract PlasmaBlocks is Ownable {
-  using SafeMath for uint256;
-
-  address[] private _blocks;
-
-  event BlocksSubmitted(uint256 indexed length, uint256 time);
-
-  function blocksLength() public view returns(uint) {
-    return _blocks.length;
-  }
-
-  function blocks(uint i) public view returns(address) {
-    return _blocks[i];
-  }
-
-  function submitBlocks(
-    uint256 fromIndex,
-    bytes newBlocks
-  )
-    public
-    onlyOwner
-    returns(uint256)
-  {
-    _submitBlocks(fromIndex, newBlocks);
-  }
-
-  function submitBlocksSigned(
-    uint256 fromIndex,
-    bytes newBlocks,
-    bytes rsv
-  )
-    public
-    returns(uint256)
-  {
-    bytes32 messageHash = keccak256(
-      abi.encodePacked(
-        fromIndex,
-        newBlocks
-      )
-    );
-
-    bytes32 signedHash = ECDSA.toEthSignedMessageHash(messageHash);
-    require(owner() == ECDSA.recover(signedHash, rsv), "Invalid signature");
-    return _submitBlocks(fromIndex, newBlocks);
-  }
-
-  function _submitBlocks(
-    uint256 fromIndex,
-    bytes newBlocks
-  )
-    internal
-    returns(uint256)
-  {
-    uint256 newBlocksLength = newBlocks.length / 20;
-
-    require(fromIndex == _blocks.length, "Invalid fromIndex");
-
-    uint256 begin = _blocks.length.sub(fromIndex);
-    _blocks.length = fromIndex.add(newBlocksLength);
-    for (uint i = begin; i < newBlocksLength; i++) {
-      address newBlock;
-      uint256 offset = 32 + i * 20;
-
-      // solium-disable-next-line security/no-inline-assembly
-      assembly {
-        // Load the current element of the proof
-        newBlock := div(mload(add(newBlocks, offset)), 0x1000000000000000000000000)
-      }
-
-      _blocks[fromIndex + i] = newBlock;
-    }
-
-    if (begin < newBlocksLength) {
-      // solium-disable-next-line security/no-block-members
-      emit BlocksSubmitted(_blocks.length, block.timestamp);
-    }
-
-    return newBlocksLength - begin;
-  }
-}
-
 // File: openzeppelin-solidity/contracts/token/ERC20/IERC20.sol
 
 /**
@@ -1294,17 +1139,174 @@ library PlasmaDecoder {
   }
 }
 
+// File: openzeppelin-solidity/contracts/cryptography/ECDSA.sol
+
+/**
+ * @title Elliptic curve signature operations
+ * @dev Based on https://gist.github.com/axic/5b33912c6f61ae6fd96d6c4a47afde6d
+ * TODO Remove this library once solidity supports passing a signature to ecrecover.
+ * See https://github.com/ethereum/solidity/issues/864
+ */
+
+library ECDSA {
+
+  /**
+   * @dev Recover signer address from a message by using their signature
+   * @param hash bytes32 message, the hash is the signed message. What is recovered is the signer address.
+   * @param signature bytes signature, the signature is generated using web3.eth.sign()
+   */
+  function recover(bytes32 hash, bytes signature)
+    internal
+    pure
+    returns (address)
+  {
+    bytes32 r;
+    bytes32 s;
+    uint8 v;
+
+    // Check the signature length
+    if (signature.length != 65) {
+      return (address(0));
+    }
+
+    // Divide the signature in r, s and v variables
+    // ecrecover takes the signature parameters, and the only way to get them
+    // currently is to use assembly.
+    // solium-disable-next-line security/no-inline-assembly
+    assembly {
+      r := mload(add(signature, 0x20))
+      s := mload(add(signature, 0x40))
+      v := byte(0, mload(add(signature, 0x60)))
+    }
+
+    // Version of signature should be 27 or 28, but 0 and 1 are also possible versions
+    if (v < 27) {
+      v += 27;
+    }
+
+    // If the version is correct return the signer address
+    if (v != 27 && v != 28) {
+      return (address(0));
+    } else {
+      // solium-disable-next-line arg-overflow
+      return ecrecover(hash, v, r, s);
+    }
+  }
+
+  /**
+   * toEthSignedMessageHash
+   * @dev prefix a bytes32 value with "\x19Ethereum Signed Message:"
+   * and hash the result
+   */
+  function toEthSignedMessageHash(bytes32 hash)
+    internal
+    pure
+    returns (bytes32)
+  {
+    // 32 is the length in bytes of hash,
+    // enforced by the type signature above
+    return keccak256(
+      abi.encodePacked("\x19Ethereum Signed Message:\n32", hash)
+    );
+  }
+}
+
+// File: contracts/PlasmaBlocks.sol
+
+contract PlasmaBlocks is Ownable {
+  using SafeMath for uint256;
+
+  address[] private _blocks;
+
+  event BlocksSubmitted(uint256 indexed length, uint256 time);
+
+  function blocksLength() public view returns(uint) {
+    return _blocks.length;
+  }
+
+  function blocks(uint i) public view returns(address) {
+    return _blocks[i];
+  }
+
+  function submitBlocks(
+    uint256 fromIndex,
+    bytes newBlocks
+  )
+    public
+    onlyOwner
+    returns(uint256)
+  {
+    _submitBlocks(fromIndex, newBlocks);
+  }
+
+  function submitBlocksSigned(
+    uint256 fromIndex,
+    bytes newBlocks,
+    bytes rsv
+  )
+    public
+    returns(uint256)
+  {
+    bytes32 messageHash = keccak256(
+      abi.encodePacked(
+        fromIndex,
+        newBlocks
+      )
+    );
+
+    bytes32 signedHash = ECDSA.toEthSignedMessageHash(messageHash);
+    require(owner() == ECDSA.recover(signedHash, rsv), "Invalid signature");
+    return _submitBlocks(fromIndex, newBlocks);
+  }
+
+  function _submitBlocks(
+    uint256 fromIndex,
+    bytes newBlocks
+  )
+    internal
+    returns(uint256)
+  {
+    uint256 newBlocksLength = newBlocks.length / 20;
+
+    require(fromIndex == _blocks.length, "Invalid fromIndex");
+
+    uint256 begin = _blocks.length.sub(fromIndex);
+    _blocks.length = fromIndex.add(newBlocksLength);
+    for (uint i = begin; i < newBlocksLength; i++) {
+      address newBlock;
+      uint256 offset = 32 + i * 20;
+
+      // solium-disable-next-line security/no-inline-assembly
+      assembly {
+        // Load the current element of the proof
+        newBlock := div(mload(add(newBlocks, offset)), 0x1000000000000000000000000)
+      }
+
+      _blocks[fromIndex + i] = newBlock;
+    }
+
+    if (begin < newBlocksLength) {
+      // solium-disable-next-line security/no-block-members
+      emit BlocksSubmitted(_blocks.length, block.timestamp);
+    }
+
+    return newBlocksLength - begin;
+  }
+}
+
 // File: contracts/PlasmaAssets.sol
 
-contract PlasmaAssets is Ownable {
+contract PlasmaAssets is Ownable, PlasmaBlocks {
   using SafeMath for uint256;
   using SafeERC20 for IERC20;
   using PlasmaDecoder for bytes;
   using OrderedIntervalList for OrderedIntervalList.Data;
+  using SumMerkleProof for SumMerkleProof.Proof;
 
   address constant public MAIN_COIN_ASSET_ID = address(0);
   address constant public ERC721_ASSET_ID = address(1);
   uint256 constant public ASSET_DECIMALS_TRUNCATION = 10e13; //TODO: will be different for tokens
+  uint32 constant public PLASMA_ASSETS_TOTAL_SIZE = 2**24 - 1;
 
   bytes32 private _expectedTokenAndTokenIdHash;
   mapping (address => uint256) private _assetOffsets;
@@ -1485,7 +1487,10 @@ contract PlasmaAssets is Ownable {
     ));
     require(_allWithdrawalHashes[inputHash], "You should start withdrawal first");
 
-    //TODO: check inclusion
+    require(txProof.sumMerkleProof(blocks(blockIndex), PLASMA_ASSETS_TOTAL_SIZE));
+
+    // Cancel widthraw
+    delete _allWithdrawalHashes[inputHash];
 
     return true;
   }
@@ -1544,6 +1549,6 @@ contract PlasmaAssets is Ownable {
 
 // File: contracts/BankexPlasma.sol
 
-contract BankexPlasma is PlasmaBlocks, PlasmaAssets {
+contract BankexPlasma is PlasmaAssets {
 
 }
