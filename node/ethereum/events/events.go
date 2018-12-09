@@ -1,7 +1,10 @@
 package events
 
 import (
+	"../../blockchain"
 	"../../config"
+	"../../plasmautils/slice"
+	"../../transactionManager"
 	"../plasmacontract"
 	"context"
 	"fmt"
@@ -27,13 +30,10 @@ type EventAssetDeposited struct {
 
 var eventGroup = make([]EventAssetDeposited, 0)
 var currentBlock uint64 = 0
+var client *ethclient.Client
+var manager *transactionManager.TransactionManager
 
 func GetEvent() bool {
-	client, err := ethclient.Dial(config.GetVerifier().GethHost)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	maxBlock, err := client.HeaderByNumber(context.Background(), nil)
 	if err != nil {
 		log.Fatal(err)
@@ -73,6 +73,17 @@ func GetEvent() bool {
 			depositEvent.BlockNumber = vLog.BlockNumber
 			PutEventsToGroup(depositEvent)
 
+			out := blockchain.Output{
+				Owner: depositEvent.Who.Bytes(),
+				Slice: slice.Slice{
+					Begin: uint32(depositEvent.Begin),
+					End:   uint32(depositEvent.End),
+				},
+			}
+			_, err = manager.AssembleDepositBlock(out)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	}
 
@@ -111,7 +122,14 @@ func ShowGroup() {
 		fmt.Printf("Who: %s\n", eventGroup[i].Who.String())
 	}
 }
-func EventListener() {
+func EventListener(m *transactionManager.TransactionManager) {
+	c, err := ethclient.Dial(config.GetVerifier().GethHost)
+	if err != nil {
+		log.Fatal(err)
+	}
+	client = c
+	manager = m
+
 	for {
 		for {
 			if !GetEvent() {
