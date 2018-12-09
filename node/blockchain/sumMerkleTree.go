@@ -1,6 +1,7 @@
 package blockchain
 
 import (
+	"encoding/binary"
 	"fmt"
 	"sort"
 
@@ -63,7 +64,9 @@ func (t SumMerkleTree) MerkleProof(Index uint32) SumMerkleProof {
 }
 
 func uint32BE(n uint32) []byte {
-	return []byte{byte(n >> 24), byte(n >> 16), byte(n >> 8), byte(n)}
+	result := make([]byte, 4)
+	binary.BigEndian.PutUint32(result, n)
+	return result
 }
 
 type OwnedSlice struct {
