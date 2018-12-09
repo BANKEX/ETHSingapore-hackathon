@@ -20,7 +20,7 @@ func Deposit(sum string) string {
 		log.Println(err)
 	}
 
-	privateKey, err := crypto.HexToECDSA(config.GetVerifier().VerifierPrivateKey)
+	privateKey, err := crypto.HexToECDSA(config.GetVerifier().VerifierPrivateKey[2:])
 	if err != nil {
 		log.Println(err)
 	}
