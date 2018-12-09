@@ -19,7 +19,7 @@ func GinServer() {
 	r.GET("/totalBalance", handlers.TotalBalanceHandler)
 	r.GET("/contractAddress", handlers.PlasmaContractAddress)
 	r.GET("/deposit/:sum", handlers.DepositHandler)
-	r.POST("/transfer/:address/:sum", handlers.TransferHandler) //
+	r.POST("/transfer/:address/:sum", handlers.TransferHandler)
 	r.GET("/plasmaBalance", handlers.PlasmaBalance) //
 	r.GET("/exit", handlers.ExitHandler) //
 	r.GET("/latestBlock", handlers.LatestBlockHandler) //

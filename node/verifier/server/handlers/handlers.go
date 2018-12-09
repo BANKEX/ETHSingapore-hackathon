@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"io"
 	"io/ioutil"
@@ -98,7 +99,14 @@ func TransferHandler(c *gin.Context) {
 
 	key, _ := hex.DecodeString(config.GetVerifier().VerifierPrivateKey)
 
+
+	fmt.Println("Tx")
+	fmt.Println(len(uTx.Outputs[0].Owner))
+
 	uTx.Sign(key)
+
+	fmt.Println("Signature")
+	fmt.Println(len(uTx.Signatures))
 
 	port := strconv.Itoa(config.GetOperator().OperatorPort)
 

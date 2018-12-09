@@ -18,8 +18,8 @@ const clean_input = function (str) {
     const BankexPlasma = JSON.parse(fs.readFileSync(BankexPlasmaJSON, 'utf8'));
     const bytecode = BankexPlasma.bytecode;
     // const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    const deployerAddress = "0xfFb85D98FC040123756ABCA2a7489A2E2716189b";
-    const privateKey = Buffer.from("0x968dae529ccf901c4fcd2bb57a4e73bd8dc6e5e662d6e6943e90fe42860fe0cc");
+    const deployerAddress = "0x9cA4E1F69A3ABD60989864FAd1025095dFCC58F1";
+    const privateKey = Buffer.from("e4058d9c3a81b4e95d8e3a17a5f52486a7fc411e57dcd4f6c771dbc2428928e9", "hex");
     const txParams = {
         gasPrice: clean_input(1),
         gas: clean_input(6050992),
@@ -33,6 +33,6 @@ const clean_input = function (str) {
     const serializedTx = tx.serialize();
     const txHash = await web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'));
     console.log("BankexPlasma address: " + txHash.contractAddress);
-    data.plasma_contract_address = txHash.contractAddress;
+    // data.plasma_contract_address = txHash.contractAddress;
     // fs.writeFileSync(filePath, JSON.stringify(data));
 })();

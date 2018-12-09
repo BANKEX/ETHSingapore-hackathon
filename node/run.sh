@@ -15,7 +15,7 @@ cd ../contracts
 
 sleep 3
 # give plasma owner 100 ether
-( echo "eth.sendTransaction({from: eth.accounts[0],to:'${ADDRESS}',value: web3.toWei(100, 'ether')})" ) | geth attach http://127.0.0.1:8545
+( echo "eth.sendTransaction({from: eth.accounts[0],to:'0x9cA4E1F69A3ABD60989864FAd1025095dFCC58F1',value: web3.toWei(100, 'ether')})" ) | geth attach http://127.0.0.1:8545
 
 
 # deploy bankex plasma contract to ethereum
