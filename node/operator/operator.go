@@ -2,6 +2,7 @@ package main
 
 import (
 	"../config"
+	"../ethereum/events"
 	"../transactionManager"
 	"./handlers"
 	"fmt"
@@ -18,6 +19,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	go events.EventListener()
 
 	r := gin.New()
 	r.Use(gin.Recovery())

@@ -16,17 +16,19 @@ import (
 	"time"
 )
 
-type EventCoinDeposited struct {
-	Who         common.Address `json:who`
-	Amount      *big.Int       `json:amount`
-	BlockNumber uint64         `json:blockNumber`
+type EventAssetDeposited struct {
+	Who         common.Address
+	IntervalId  uint64
+	Begin       uint64
+	End         uint64
+	BlockNumber uint64
 }
 
-var eventGroup = make([]EventCoinDeposited, 0)
+var eventGroup = make([]EventAssetDeposited, 0)
 var currentBlock uint64 = 0
 
 func GetEvent() bool {
-	client, err := ethclient.Dial("http://localhost:9545")
+	client, err := ethclient.Dial("http://localhost:8545")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -55,26 +57,25 @@ func GetEvent() bool {
 		log.Fatal(err)
 	}
 
-
-	Sig := []byte("CoinDeposited(address,uint256)")
+	Sig := []byte("AssetDeposited(address,address,uint64,uint64,uint64)")
 	SigHash := crypto.Keccak256Hash(Sig)
 
 	for _, vLog := range logs {
 		switch vLog.Topics[0].Hex() {
 		case SigHash.Hex():
-			var depositEvent EventCoinDeposited
-			err := contractAbi.Unpack(&depositEvent, "CoinDeposited", vLog.Data)
+			var depositEvent EventAssetDeposited
+			err := contractAbi.Unpack(&depositEvent, "AssetDeposited", vLog.Data)
 			if err != nil {
 				log.Fatal(err)
 			}
-			depositEvent.Who = common.HexToAddress(vLog.Topics[1].Hex())
+			depositEvent.Who = common.HexToAddress(vLog.Topics[2].Hex())
 			depositEvent.BlockNumber = vLog.BlockNumber
 			PutEventsToGroup(depositEvent)
 
 		}
 	}
 
-	if currentBlock <= maxBlock.Number.Uint64() + 1 {
+	if currentBlock <= maxBlock.Number.Uint64()+1 {
 		SetLastBlock(currentBlock + 1)
 	}
 
@@ -89,8 +90,8 @@ func SetLastBlock(v uint64) {
 }
 
 func checker(current, final uint64) uint64 {
-	if current + 1 <= final {
-		current = current+1
+	if current+1 <= final {
+		current = current + 1
 	} else {
 		delta := final - current
 		current = current + delta
@@ -98,15 +99,14 @@ func checker(current, final uint64) uint64 {
 	return current
 }
 
-
-func PutEventsToGroup(e EventCoinDeposited) {
+func PutEventsToGroup(e EventAssetDeposited) {
 	eventGroup = append(eventGroup, e)
 }
 
 func ShowGroup() {
 	for i := range eventGroup {
 		fmt.Printf("BlockNumber: %d\n", eventGroup[i].BlockNumber)
-		fmt.Printf("Amount: %s\n", eventGroup[i].Amount.String())
+		fmt.Printf("Amount: %d\n", eventGroup[i].Begin-eventGroup[i].End)
 		fmt.Printf("Who: %s\n", eventGroup[i].Who.String())
 	}
 }
@@ -119,6 +119,7 @@ func EventListener() {
 		}
 	}
 }
+
 var round int
 
 func EventShow() {
@@ -129,4 +130,3 @@ func EventShow() {
 		time.Sleep(time.Second * 15)
 	}
 }
-
