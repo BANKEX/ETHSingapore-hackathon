@@ -8,16 +8,20 @@ import { IERC721 } from "openzeppelin-solidity/contracts/token/ERC721/IERC721.so
 import { OrderedIntervalList } from "./OrderedIntervalList.sol";
 import { SumMerkleProof } from "./SumMerkleProof.sol";
 import { PlasmaDecoder } from "./PlasmaDecoder.sol";
+import { PlasmaBlocks } from "./PlasmaBlocks.sol";
 
-contract PlasmaAssets is Ownable {
+
+contract PlasmaAssets is Ownable, PlasmaBlocks {
   using SafeMath for uint256;
   using SafeERC20 for IERC20;
   using PlasmaDecoder for bytes;
   using OrderedIntervalList for OrderedIntervalList.Data;
+  using SumMerkleProof for SumMerkleProof.Proof;
 
   address constant public MAIN_COIN_ASSET_ID = address(0);
   address constant public ERC721_ASSET_ID = address(1);
   uint256 constant public ASSET_DECIMALS_TRUNCATION = 10e13; //TODO: will be different for tokens
+  uint32 constant public PLASMA_ASSETS_TOTAL_SIZE = 2**24 - 1;
 
   bytes32 private _expectedTokenAndTokenIdHash;
   mapping (address => uint256) private _assetOffsets;
@@ -198,7 +202,10 @@ contract PlasmaAssets is Ownable {
     ));
     require(_allWithdrawalHashes[inputHash], "You should start withdrawal first");
 
-    //TODO: check inclusion
+    require(txProof.sumMerkleProof(blocks(blockIndex), PLASMA_ASSETS_TOTAL_SIZE));
+
+    // Cancel widthraw
+    delete _allWithdrawalHashes[inputHash];
 
     return true;
   }
