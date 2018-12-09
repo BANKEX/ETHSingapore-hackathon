@@ -1,6 +1,7 @@
 package events
 
 import (
+	"../../config"
 	"../plasmacontract"
 	"context"
 	"fmt"
@@ -28,7 +29,7 @@ var eventGroup = make([]EventAssetDeposited, 0)
 var currentBlock uint64 = 0
 
 func GetEvent() bool {
-	client, err := ethclient.Dial("http://localhost:8545")
+	client, err := ethclient.Dial(config.GetVerifier().GethHost)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -38,7 +39,7 @@ func GetEvent() bool {
 		log.Fatal(err)
 	}
 
-	contractAddress := common.HexToAddress("0xa86a2c6B81C22d25D8EBAf8cE52895F46A263348")
+	contractAddress := common.HexToAddress(config.GetOperator().PlasmaContractAddress)
 	query := ethereum.FilterQuery{
 		FromBlock: big.NewInt(int64(currentBlock)),
 		ToBlock:   big.NewInt(int64(checker(currentBlock, maxBlock.Number.Uint64()))),
