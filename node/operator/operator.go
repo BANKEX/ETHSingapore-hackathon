@@ -20,7 +20,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	go events.EventListener()
+	go events.EventListener(manager)
 
 	r := gin.New()
 	r.Use(gin.Recovery())
