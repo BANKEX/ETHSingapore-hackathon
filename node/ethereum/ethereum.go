@@ -65,7 +65,7 @@ func Deposit(sum string) string {
 }
 
 func GetBalance(address string) string {
-	client, err := ethclient.Dial(config.GetVerifier().GethHost)
+	client, err := ethclient.Dial(config.GetOperator().GethHost)
 	if err != nil {
 		log.Println(err)
 	}
@@ -119,7 +119,7 @@ func PushHashBlock(blockNumber uint32, hash []byte) {
 	}
 
 	// _, err = instance.SubmitBlocks(blockNumber, hash) // TODO: uncomment after regenerating abi
-	_, err = instance.SubmitBlocks(auth,   nil,nil) // TODO: normal params
+	_, err = instance.SubmitBlocks(auth, nil, nil) // TODO: normal params
 	if err != nil {
 		log.Println(err)
 	}
