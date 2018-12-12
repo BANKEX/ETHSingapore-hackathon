@@ -3,7 +3,6 @@ package transactionManager
 import (
 	"../config"
 	"../ethereum/plasmacontract"
-	"./eventHandlers"
 	"context"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -11,8 +10,10 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"log"
 	"math/big"
 	"strings"
+	"time"
 )
 
 const (
@@ -24,7 +25,7 @@ const (
 type EventMonitor struct {
 	transactionManager *TransactionManager
 	client             *ethclient.Client
-	currentBlock       uint64
+	currentBlock       int64
 }
 
 func NewEventMonitor(m *TransactionManager) (*EventMonitor, error) {
@@ -49,7 +50,21 @@ func NewEventMonitor(m *TransactionManager) (*EventMonitor, error) {
 //// todo if we need to send some challenges from the operator, this is the place to do it
 
 func (m *EventMonitor) loop() {
-	//
+	for {
+		result, err := m.processBlock(m.currentBlock)
+		switch result {
+		case statusSuccess:
+			log.Printf("processed block %d for events", m.currentBlock)
+			m.currentBlock++
+			break
+		case statusError:
+			log.Printf("error processing block %d for events: %s", m.currentBlock, err.Error())
+			time.Sleep(time.Second * 10)
+			break
+		case statusNoSuchBlock:
+			time.Sleep(time.Second)
+		}
+	}
 }
 
 func (m *EventMonitor) processBlock(blockNumber int64) (int, error) {
@@ -79,11 +94,11 @@ func (m *EventMonitor) processLogs(logs []types.Log) error {
 		return err
 	}
 
-	for _, vLog := range logs {
-		for _, h := range eventHandlers.Handlers {
-			if crypto.Keccak256Hash([]byte(h.Signature)).Hex() == vLog.Topics[0].Hex() {
-				for range vLog.Topics {
-					h.Handler(vLog, contractAbi)
+	for _, log := range logs {
+		for _, h := range Handlers {
+			if crypto.Keccak256Hash([]byte(h.Signature)).Hex() == log.Topics[0].Hex() {
+				for range log.Topics {
+					h.Handler(log, contractAbi)
 				}
 
 			}

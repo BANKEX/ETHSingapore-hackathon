@@ -1,9 +1,8 @@
-package eventHandlers
+package transactionManager
 
 import (
-	"../../blockchain"
-	"../../plasmautils/slice"
-	"../../transactionManager"
+	"../blockchain"
+	"../plasmautils/slice"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -19,7 +18,7 @@ var Handlers = []Event{
 	{"AssetDeposited(address,address,uint64,uint64,uint64)", HandleDeposit},
 }
 
-var Manager *transactionManager.TransactionManager
+var Manager *TransactionManager
 
 type EventAssetDeposited struct {
 	Who         common.Address
@@ -35,11 +34,10 @@ func HandleDeposit(data types.Log, abi abi.ABI) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	depositEvent.Who = common.HexToAddress(data.Topics[2].Hex())
-	depositEvent.BlockNumber = data.BlockNumber
+	who := data.Topics[2].Bytes()
 
 	out := blockchain.Output{
-		Owner: depositEvent.Who.Bytes(),
+		Owner: who,
 		Slice: slice.Slice{
 			Begin: uint32(depositEvent.Begin),
 			End:   uint32(depositEvent.End),

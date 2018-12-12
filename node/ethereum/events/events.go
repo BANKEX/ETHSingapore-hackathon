@@ -123,7 +123,7 @@ func ShowGroup() {
 	}
 }
 func EventListener(m *transactionManager.TransactionManager) {
-	c, err := ethclient.Dial(config.GetVerifier().GethHost)
+	c, err := ethclient.Dial(config.GetOperator().GethHost)
 	if err != nil {
 		log.Fatal(err)
 	}
