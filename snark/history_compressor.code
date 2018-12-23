@@ -1,4 +1,3 @@
-//template for algebraic hash
 // plasma is 24bit. so, all magnitudes limeted by 2^32-1
 // NOT IMPLEMENTED: safe algebraic hash. Going to use Pedersen commitment with libsnark on the production
 // Overflows are safe due summerkletree architecture in plasma.
